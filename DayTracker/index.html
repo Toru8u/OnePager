@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <!-- Consent Modal -->
+    <div id="consent-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h2>Data Privacy</h2>
+            <p>This app uses LocalStorage to save your habits and history directly on your device. No data is sent to
+                any server.</p>
+            <div class="modal-actions">
+                <button id="btn-accept-storage" class="btn-primary">I Understand & Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Selection / Login -->
+    <div id="login-screen" class="screen hidden">
+        <div class="glass-panel login-panel">
+            <h1>Day Tracker</h1>
+            <p>Select or create a profile</p>
+            <div id="user-list" class="user-list">
+                <!-- User buttons injected here -->
+            </div>
+            <div class="new-user-form">
+                <input type="text" id="new-username" placeholder="New Profile Name" maxlength="15">
+                <button id="btn-create-user" class="btn-icon">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Dashboard -->
+    <div id="app-dashboard" class="screen hidden">
+        <header class="app-header glass-panel">
+            <div class="header-top">
+                <h2 id="current-user-display">User</h2>
+                <button id="btn-logout" class="btn-text">Switch User</button>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <!-- Input Section -->
+            <section class="input-section glass-panel">
+                <div class="date-input-row">
+                    <label for="date-picker">Date:</label>
+                    <input type="date" id="date-picker">
+                </div>
+
+                <div class="time-selector">
+                    <button class="time-btn active" data-time="Morning">Morning</button>
+                    <button class="time-btn" data-time="Noon">Noon</button>
+                    <button class="time-btn" data-time="Evening">Evening</button>
+                    <button class="time-btn" data-time="Night">Night</button>
+                </div>
+
+                <div class="category-tabs">
+                    <button class="cat-btn active" data-cat="Eating">🍔 Eating</button>
+                    <button class="cat-btn" data-cat="Toilette">🚽 Toilette</button>
+                    <button class="cat-btn" data-cat="Sports">🏃 Sports</button>
+                    <button class="cat-btn" data-cat="Mood">😊 Mood</button>
+                    <button class="cat-btn" data-cat="Sleeping">😴 Sleeping</button>
+                </div>
+
+                <div class="entry-form">
+                    <div class="emoji-picker" id="emoji-options">
+                        <!-- Emojis injected based on category -->
+                    </div>
+                    <textarea id="entry-text" placeholder="Add details..."></textarea>
+                    <button id="btn-save-entry" class="btn-primary full-width">Save Entry</button>
+                    <button id="btn-cancel-edit" class="btn-secondary full-width hidden">Cancel Edit</button>
+                </div>
+            </section>
+
+            <!-- History Feed -->
+            <section class="history-section">
+                <h3>Activity Log</h3>
+                <div id="activity-feed" class="feed-list">
+                    <!-- Entries injected here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
