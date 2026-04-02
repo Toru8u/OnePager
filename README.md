@@ -11,5 +11,8 @@ OnePager brings together practical HTML-based utilities in one repository. These
 - Mobile-friendly - Responsive design for all devices
 - Easy to customize - Clean, readable code structure
 
-see documentation [here](KreditKompass.html)
+[KreditKompass](KreditKompass.html)
+[Font-Generator](font-generator.html)
+[DayTracker](DayTracker/index.html)
+
 
