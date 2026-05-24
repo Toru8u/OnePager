@@ -12,7 +12,12 @@ OnePager brings together practical HTML-based utilities in one repository. These
 - Easy to customize - Clean, readable code structure
 
 [KreditKompass](KreditKompass.html)
+
+[Image Strip Cutter](image-strip-cutter.html)
+
 [Font-Generator](font-generator.html)
+
 [DayTracker](DayTracker/index.html)
+
 
 
