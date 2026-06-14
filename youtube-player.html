@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Player</title>
+  <style>
+    :root, [data-theme="light"] {
+      --color-bg: #f7f6f2;
+      --color-surface: #f9f8f5;
+      --color-text: #28251d;
+      --color-text-muted: #7a7974;
+      --color-primary: #01696f;
+      --color-border: #d4d1ca;
+      --color-error: #a12c7b;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+      --shadow-lg: 0 12px 32px oklch(0.2 0.01 80 / 0.12);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614;
+      --color-surface: #1c1b19;
+      --color-text: #cdccca;
+      --color-text-muted: #797876;
+      --color-primary: #4f98a3;
+      --color-border: #393836;
+      --color-error: #d163a7;
+      --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+      --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.4);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: none; text-size-adjust: none; scroll-behavior: smooth; }
+    body {
+      min-height: 100dvh;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      gap: 1.5rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 0.4rem 0.6rem;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.18s, color 0.18s;
+    }
+    .theme-toggle:hover { color: var(--color-text); border-color: var(--color-primary); }
+
+    /* Player card */
+    .player-card {
+      width: 100%;
+      max-width: 860px;
+      background: var(--color-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      border: 1px solid oklch(from var(--color-text, #28251d) l c h / 0.08);
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: #888;
+      font-size: var(--text-sm);
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .placeholder svg { opacity: 0.4; }
+
+    /* Input area */
+    .input-area {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-top: 1px solid oklch(from var(--color-border, #d4d1ca) l c h / 0.6);
+    }
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .url-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: var(--text-sm);
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .url-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px oklch(from var(--color-primary, #01696f) l c h / 0.15);
+    }
+    .url-input::placeholder { color: var(--color-text-muted); }
+    .btn-play {
+      padding: 0.6rem 1.2rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.18s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-play:hover { filter: brightness(1.1); }
+    .btn-play:active { transform: scale(0.97); }
+    .error-msg {
+      font-size: var(--text-sm);
+      color: var(--color-error);
+      display: none;
+    }
+    .hint {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* Share link section */
+    .share-area {
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      padding: 0.6rem 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      border: 1px solid var(--color-border);
+    }
+    .share-link {
+      flex: 1;
+      min-width: 180px;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      word-break: break-all;
+      font-family: 'SF Mono', 'Courier New', monospace;
+      font-size: 0.8rem;
+    }
+    .btn-copy {
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      white-space: nowrap;
+    }
+    .btn-copy:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .copy-success { color: #437a22; font-size: var(--text-sm); display: none; }
+
+    @media (max-width: 500px) {
+      .input-row { flex-direction: column; }
+      .btn-play { width: 100%; justify-content: center; }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="3" fill="currentColor" opacity="0.15"/>
+      <polygon points="10,9 17,12 10,15" fill="currentColor"/>
+    </svg>
+    VideoLink
+  </a>
+  <button class="theme-toggle" data-theme-toggle aria-label="Dark mode umschalten">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
+</header>
+
+<div class="player-card">
+  <div class="video-wrapper" id="playerWrap">
+    <div class="placeholder" id="placeholder">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="5" width="20" height="14" rx="3"/>
+        <polygon points="10,9 16,12 10,15"/>
+      </svg>
+      <span>YouTube-URL eingeben und auf Abspielen klicken</span>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <input
+        type="url"
+        id="urlInput"
+        class="url-input"
+        placeholder="https://www.youtube.com/watch?v=… oder youtu.be/…"
+        autocomplete="off"
+        inputmode="url"
+      />
+      <button class="btn-play" id="playBtn" onclick="loadVideo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        Abspielen
+      </button>
+    </div>
+    <div class="error-msg" id="errorMsg">⚠ Keine gültige YouTube-URL erkannt.</div>
+
+    <div class="share-area" id="shareArea" style="display:none">
+      <span class="share-link" id="shareLink"></span>
+      <button class="btn-copy" id="copyBtn" onclick="copyLink()">Link kopieren</button>
+      <span class="copy-success" id="copySuccess">✓ Kopiert!</span>
+    </div>
+    <p class="hint" id="hintText">Einfach den Link dieser Seite weiterschicken – der öffnet das Video direkt.</p>
+  </div>
+</div>
+
+<script>
+  // Theme toggle
+  (function(){
+    const t = document.querySelector('[data-theme-toggle]');
+    const r = document.documentElement;
+    let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+    r.setAttribute('data-theme', d);
+    updateIcon(t, d);
+    t.addEventListener('click', () => {
+      d = d === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', d);
+      updateIcon(t, d);
+    });
+    function updateIcon(btn, mode) {
+      btn.innerHTML = mode === 'dark'
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+  })();
+
+  // Extract YouTube video ID from various URL formats
+  function extractVideoId(input) {
+    input = input.trim();
+    const patterns = [
+      /[?&]v=([a-zA-Z0-9_-]{11})/,
+      /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const p of patterns) {
+      const m = input.match(p);
+      if (m) return m[1];
+    }
+    // plain 11-char ID?
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+    return null;
+  }
+
+  function loadVideo(videoId) {
+    const input = document.getElementById('urlInput');
+    const errorMsg = document.getElementById('errorMsg');
+    const shareArea = document.getElementById('shareArea');
+    const shareLink = document.getElementById('shareLink');
+    const hintText = document.getElementById('hintText');
+    const placeholder = document.getElementById('placeholder');
+    const playerWrap = document.getElementById('playerWrap');
+
+    const id = videoId || extractVideoId(input.value);
+
+    if (!id) {
+      errorMsg.style.display = 'block';
+      return;
+    }
+    errorMsg.style.display = 'none';
+
+    // Remove old iframe if present
+    const old = playerWrap.querySelector('iframe');
+    if (old) old.remove();
+    placeholder.style.display = 'none';
+
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('loading', 'lazy');
+    playerWrap.appendChild(iframe);
+
+    // Update URL without reload
+    const newUrl = `${location.origin}${location.pathname}?v=${id}`;
+    history.replaceState(null, '', `?v=${id}`);
+
+    shareLink.textContent = newUrl;
+    shareArea.style.display = 'flex';
+    hintText.style.display = 'none';
+
+    if (!videoId) input.value = '';
+  }
+
+  function copyLink() {
+    const link = document.getElementById('shareLink').textContent;
+    navigator.clipboard.writeText(link).then(() => {
+      const s = document.getElementById('copySuccess');
+      s.style.display = 'inline';
+      setTimeout(() => s.style.display = 'none', 2000);
+    });
+  }
+
+  // Allow Enter key to trigger play
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadVideo();
+  });
+
+  // Auto-load from URL param on page open
+  (function() {
+    const params = new URLSearchParams(location.search);
+    const v = params.get('v');
+    if (v) loadVideo(v);
+  })();
+</script>
+</body>
+</html>
