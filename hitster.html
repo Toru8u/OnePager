@@ -4,12 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Hitster Digital – iPad Edition</title>
-  <!-- Tailwind CSS für das Layout -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PapaParse für robustes CSV-Parsing über Header-Namen -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
   <style>
-    /* Verhindert Textmarkierung und optimiert Touch-Scrolling auf dem iPad */
     body {
       user-select: none;
       -webkit-user-select: none;
@@ -19,7 +16,7 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
     }
-    /* Unsichtbarer YT-Player: Darf auf iOS nicht display:none oder 0x0px sein */
+    /* Unsichtbarer YT-Player für iPadOS */
     #yt-wrapper {
       position: fixed;
       bottom: 0;
@@ -43,12 +40,12 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans overflow-x-hidden">
 
-  <!-- Versteckter YouTube Player Container -->
+  <!-- Versteckter YouTube Player -->
   <div id="yt-wrapper">
     <div id="yt-player"></div>
   </div>
 
-  <!-- Toast-Benachrichtigung (z.B. bei defektem YouTube-Link) -->
+  <!-- Toast-Benachrichtigung -->
   <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-amber-500 text-slate-950 font-bold px-6 py-3 rounded-full shadow-2xl transition-all"></div>
 
   <!-- ========================================================= -->
@@ -70,35 +67,19 @@
         </label>
         
         <select id="playlist-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400">
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de.csv" selected>
-            Hitster Deutschland (Standard - hitster-de.csv)
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0012.csv">
-            Hitster DE – Summer Party
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0015.csv">
-            Hitster DE – Guilty Pleasures
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0007.csv">
-            Hitster DE – Schlager Party
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0039.csv">
-            Hitster DE – Rock
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0026.csv">
-            Hitster DE – Movies & TV Soundtracks
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0025.csv">
-            Hitster DE – Bayern 1
-          </option>
-          <option value="https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/hitster-de-aaaa0054.csv">
-            Hitster DE – Platinum Edition
-          </option>
+          <option value="hitster-de.csv" selected>Hitster Deutschland (Standard - hitster-de.csv)</option>
+          <option value="hitster-de-aaaa0012.csv">Hitster DE – Summer Party</option>
+          <option value="hitster-de-aaaa0015.csv">Hitster DE – Guilty Pleasures</option>
+          <option value="hitster-de-aaaa0007.csv">Hitster DE – Schlager Party</option>
+          <option value="hitster-de-aaaa0039.csv">Hitster DE – Rock</option>
+          <option value="hitster-de-aaaa0026.csv">Hitster DE – Movies & TV Soundtracks</option>
+          <option value="hitster-de-aaaa0025.csv">Hitster DE – Bayern 1</option>
+          <option value="hitster-de-aaaa0054.csv">Hitster DE – Platinum Edition</option>
         </select>
 
-        <div class="flex items-center justify-between pt-2">
-          <span class="text-xs text-slate-400">Oder eigene CSV-Datei vom iPad laden:</span>
-          <input type="file" id="csv-file-input" accept=".csv" class="text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700" />
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <span class="text-xs text-slate-400">Oder eigene CSV-Datei vom Gerät laden:</span>
+          <input type="file" id="csv-file-input" accept=".csv,.txt" class="text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700" />
         </div>
         <div id="deck-status" class="text-xs font-medium text-emerald-400 pt-1"></div>
       </div>
@@ -113,9 +94,7 @@
             + Spieler hinzufügen
           </button>
         </div>
-        <div id="player-inputs" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Wird dynamisch per JS befüllt -->
-        </div>
+        <div id="player-inputs" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
       </div>
 
       <!-- 3. Spielziel -->
@@ -127,9 +106,9 @@
           <p class="text-xs text-slate-400">Inklusive der offenen Startkarte (Offiziell: 10)</p>
         </div>
         <select id="target-score-select" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-bold">
-          <option value="5">5 Karten (Schnell)</option>
+          <option value="5" selected>5 Karten (Schnell)</option>
           <option value="7">7 Karten (Mittel)</option>
-          <option value="10" selected>10 Karten (Original)</option>
+          <option value="10">10 Karten (Original)</option>
           <option value="15">15 Karten (Lang)</option>
         </select>
       </div>
@@ -157,10 +136,7 @@
         </span>
       </div>
 
-      <!-- Kompakte Spieler-Übersicht -->
-      <div id="dashboard-players" class="flex items-center gap-2 overflow-x-auto py-1">
-        <!-- Dynamische Spieler-Pills -->
-      </div>
+      <div id="dashboard-players" class="flex items-center gap-2 overflow-x-auto py-1"></div>
 
       <button id="abort-game-btn" class="text-xs text-slate-400 hover:text-rose-400 border border-slate-800 px-3 py-1.5 rounded-lg">
         Beenden
@@ -171,7 +147,6 @@
     <section class="flex-1 flex flex-col items-center justify-center px-6 py-2 overflow-y-auto">
       <div class="w-full max-w-3xl text-center space-y-4">
         
-        <!-- Aktiver Spieler Groß -->
         <div>
           <p class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Aktuell am Zug</p>
           <h2 id="active-player-name" class="text-4xl sm:text-5xl font-black text-white tracking-tight mt-0.5">
@@ -179,7 +154,7 @@
           </h2>
         </div>
 
-        <!-- AUDIO CONTROLS (Während des Ratens) -->
+        <!-- AUDIO CONTROLS -->
         <div id="guessing-panel" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
           <div class="flex flex-col items-center justify-center space-y-3">
             <div id="vinyl-indicator" class="w-20 h-20 rounded-full bg-gradient-to-tr from-pink-600 via-purple-600 to-cyan-500 flex items-center justify-center shadow-lg">
@@ -203,7 +178,7 @@
           </div>
         </div>
 
-        <!-- AUFLÖSUNGS-PANEL (Nach Klick auf eine Lücke) -->
+        <!-- AUFLÖSUNGS-PANEL -->
         <div id="reveal-panel" class="hidden bg-slate-900 border-2 rounded-3xl p-6 shadow-2xl space-y-4">
           <div id="reveal-verdict" class="text-2xl font-black uppercase tracking-wider"></div>
           
@@ -232,10 +207,7 @@
         <span class="text-xs text-slate-500">Horizontal wischen zum Scrollen ↔</span>
       </div>
 
-      <!-- Horizontal scrollbarer Container für Karten & Lücken-Buttons -->
-      <div id="timeline-container" class="timeline-scroll flex items-center gap-3 overflow-x-auto py-3 px-4 min-h-[170px]">
-        <!-- Dynamisch generierte Slots und Karten -->
-      </div>
+      <div id="timeline-container" class="timeline-scroll flex items-center gap-3 overflow-x-auto py-3 px-4 min-h-[170px]"></div>
     </section>
 
   </div>
@@ -249,9 +221,7 @@
       <h2 id="winner-headline" class="text-3xl font-black text-white">Spiel beendet!</h2>
       <p id="winner-subline" class="text-slate-400 text-sm"></p>
 
-      <div id="leaderboard-list" class="space-y-2 text-left bg-slate-950 p-4 rounded-2xl border border-slate-800">
-        <!-- Platzierungen -->
-      </div>
+      <div id="leaderboard-list" class="space-y-2 text-left bg-slate-950 p-4 rounded-2xl border border-slate-800"></div>
 
       <button id="play-again-btn" type="button" class="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 font-black text-lg text-white shadow-lg active:scale-95 transition">
         Neues Spiel konfigurieren
@@ -259,30 +229,27 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- SPIELLOGIK & YOUTUBE IFRAME INTEGRATION                   -->
-  <!-- ========================================================= -->
   <script>
     /****************************************************************
      * 1. STATE MANAGEMENT
      ****************************************************************/
     const state = {
-      rawSongs: [],         // Alle geladenen Songs der CSV
-      deck: [],             // Gemischter Nachziehstapel
-      players: [],          // [{ name: 'Annabel', cards: [{title, artist, year, videoId}] }]
+      rawSongs: [],
+      deck: [],
+      players: [],
       activePlayerIdx: 0,
       round: 1,
-      targetScore: 10,
+      targetScore: 5,
       finalRoundTriggered: false,
-      currentSong: null,    // Aktuell zu erratender Song
-      turnResolved: false,  // Wurde in diesem Zug schon eine Lücke gewählt?
-      lastPlacedSlot: null, // Index der gewählten Lücke für visuelles Feedback
+      currentSong: null,
+      turnResolved: false,
+      lastPlacedSlot: null,
       lastPlacementValid: false
     };
 
     let ytPlayer = null;
     let ytReady = false;
-    let defaultPlayerNames = ['Annabel', 'Spieler 2'];
+    let defaultPlayerNames = ['Tine', 'Thorsten', 'Basti', 'Jonas'];
 
     /****************************************************************
      * 2. YOUTUBE IFRAME API INITIALISIERUNG
@@ -301,7 +268,7 @@
           disablekb: 1,
           fs: 0,
           modestbranding: 1,
-          playsinline: 1, // Wichtig für iPadOS: Verhindert Vollbild-Popup!
+          playsinline: 1,
           rel: 0
         },
         events: {
@@ -324,69 +291,122 @@
       }
     }
 
-    // Automatische Fehlerbehandlung, wenn ein YouTube-Video gelöscht/gesperrt ist
-    function onPlayerError(event) {
+    function onPlayerError() {
       if (document.getElementById('game-screen').classList.contains('hidden')) return;
-      showToast('⚠️ YouTube-Video nicht verfügbar – ziehe automatisch Ersatzkarte...');
-      setTimeout(() => {
-        drawReplacementSong();
-      }, 900);
+      showToast('⚠️ YouTube-Video gesperrt/nicht verfügbar – ziehe Ersatzkarte...');
+      setTimeout(() => drawReplacementSong(), 900);
     }
 
     /****************************************************************
-     * 3. CSV PARSING & PLAYLIST LADEN
+     * 3. ROBUSTES CSV PARSING (INKL. LEERZEICHEN-TRIM & FALLBACK)
      ****************************************************************/
-    function extractYouTubeId(url) {
-      if (!url) return null;
-      const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+    function extractYouTubeId(str) {
+      if (!str) return null;
+      const cleaned = str.replace(/\s+/g, '');
+      const match = cleaned.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
       return match ? match[1] : null;
     }
 
     function parseCSVContent(csvText, sourceLabel) {
       const statusEl = document.getElementById('deck-status');
+
+      // Schutz: Prüfen, ob versehentlich eine GitHub-HTML-Seite statt Raw-CSV heruntergeladen wurde
+      if (csvText.trim().toLowerCase().startsWith('<!doctype html') || csvText.includes('<html')) {
+        state.rawSongs = [];
+        statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
+        statusEl.textContent = `❌ "${sourceLabel}" ist eine HTML-Webseite und keine Raw-CSV-Datei!`;
+        return;
+      }
+
       Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
+        // WICHTIG: andygruber-CSVs haben Leerzeichen nach dem Komma (" Title", " Year", " URL")!
+        transformHeader: function (header) {
+          return header.replace(/^\uFEFF/, '').trim().toLowerCase();
+        },
         complete: function (results) {
           const validSongs = [];
+
           for (const row of results.data) {
-            // Unterstützt unterschiedliche Spalten-Schreibweisen in den andygruber-Repos
-            const title = (row.Title || row.title || '').trim();
-            const artist = (row.Artist || row.artist || '').trim();
-            const yearStr = (row.Year || row.year || '').toString().trim();
-            const url = (row.URL || row.url || '').trim();
+            let title = (row['title'] || row['song'] || row['name'] || '').trim();
+            let artist = (row['artist'] || row['interpret'] || '').trim();
+            let yearStr = (row['year'] || row['jahr'] || '').toString().trim();
+            let url = (row['url'] || row['link'] || row['youtube'] || '').trim();
+
+            // Fallback: Falls Spalten anders heißen, suche YouTube-Link & 4-stellige Jahreszahl automatisch
+            if (!url || !yearStr) {
+              for (const val of Object.values(row)) {
+                const s = String(val || '').trim();
+                if (!url && (s.includes('youtube.com') || s.includes('youtu.be'))) url = s;
+                if (!yearStr && /^(19\d\d|20[0-2]\d)$/.test(s)) yearStr = s;
+              }
+            }
 
             const year = parseInt(yearStr, 10);
             const videoId = extractYouTubeId(url);
 
-            if (title && !isNaN(year) && year > 1800 && year <= 2030 && videoId) {
-              validSongs.push({ title, artist, year, videoId });
+            if (!isNaN(year) && year > 1850 && year <= 2030 && videoId) {
+              validSongs.push({
+                title: title || 'Unbekannter Titel',
+                artist: artist || 'Unbekannter Interpret',
+                year,
+                videoId
+              });
             }
           }
+
           state.rawSongs = validSongs;
-          statusEl.textContent = `✓ ${validSongs.length} gültige Songs geladen (${sourceLabel})`;
+
+          if (validSongs.length > 0) {
+            statusEl.className = 'text-xs font-medium text-emerald-400 pt-1';
+            statusEl.textContent = `✓ ${validSongs.length} gültige Songs geladen (${sourceLabel})`;
+          } else {
+            const foundCols = results.meta && results.meta.fields ? results.meta.fields.join(', ') : 'keine';
+            statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
+            statusEl.textContent = `❌ 0 Songs mit YouTube-Link erkannt in "${sourceLabel}" (Gefundene Spalten: ${foundCols}).`;
+          }
         },
-        error: function () {
-          statusEl.textContent = '❌ Fehler beim Lesen der CSV-Datei.';
+        error: function (err) {
+          statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
+          statusEl.textContent = '❌ Fehler beim Lesen der CSV: ' + err.message;
         }
       });
     }
 
     async function loadSelectedGitHubPlaylist() {
       const select = document.getElementById('playlist-select');
-      const url = select.value;
+      const fileName = select.value;
       const label = select.options[select.selectedIndex].text.trim();
       const statusEl = document.getElementById('deck-status');
-      statusEl.textContent = 'Lade Playlist von GitHub...';
+      
+      statusEl.className = 'text-xs font-medium text-amber-400 pt-1';
+      statusEl.textContent = `⏳ Lade "${label}"...`;
 
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        parseCSVContent(text, label);
-      } catch (err) {
-        statusEl.textContent = '❌ Download fehlgeschlagen. Bitte lokale CSV wählen oder Internet prüfen.';
+      // Mehrere Spiegelserver (jsDelivr umgeht Brave-Shields-Blockaden auf github.io zuverlässig)
+      const urlsToTry = [
+        `https://cdn.jsdelivr.net/gh/andygruber/songseeker-hitster-playlists@main/${fileName}`,
+        `https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/${fileName}`,
+        `./${fileName}` // Falls du die CSV direkt mit in dein eigenes Repo legst
+      ];
+
+      for (const url of urlsToTry) {
+        try {
+          const res = await fetch(url, { cache: 'no-store' });
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.length > 50 && !text.trim().toLowerCase().startsWith('<!doctype')) {
+              parseCSVContent(text, label);
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn('Mirror fehlgeschlagen:', url, err);
+        }
       }
+
+      statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
+      statusEl.textContent = '❌ Online-Abruf blockiert. Bitte wähle die CSV-Datei über "Browse..." direkt aus.';
     }
 
     /****************************************************************
@@ -456,12 +476,11 @@
     }
 
     document.getElementById('start-game-btn').addEventListener('click', () => {
-      // Namen auslesen
       const inputs = [...document.querySelectorAll('.player-name-input')];
       const names = inputs.map((el, i) => el.value.trim() || `Spieler ${i + 1}`);
 
-      if (state.rawSongs.length < names.length * 3) {
-        alert('Zu wenige Songs im Deck geladen. Bitte warte kurz oder wähle eine gültige CSV.');
+      if (state.rawSongs.length < names.length * 2) {
+        alert(`Es sind aktuell ${state.rawSongs.length} gültige Songs geladen. Bitte prüfe die Statusmeldung oben unter Punkt 1.`);
         return;
       }
 
@@ -471,7 +490,6 @@
       state.activePlayerIdx = 0;
       state.finalRoundTriggered = false;
 
-      // Offizielle Hitster-Regel: Jeder Spieler erhält sofort 1 offene Startkarte
       state.players = names.map(name => ({
         name,
         cards: [state.deck.pop()]
@@ -494,7 +512,6 @@
       state.lastPlacedSlot = null;
       state.currentSong = state.deck.pop();
 
-      // UI zurücksetzen
       document.getElementById('guessing-panel').classList.remove('hidden');
       document.getElementById('reveal-panel').classList.add('hidden');
       document.getElementById('audio-status-text').textContent = 'Lade Song... (Falls kein Ton kommt, auf Play tippen)';
@@ -568,9 +585,7 @@
       const player = state.players[state.activePlayerIdx];
       const cards = player.cards;
 
-      // Für N Karten gibt es N+1 Lücken (Slots 0 bis N)
       for (let slotIdx = 0; slotIdx <= cards.length; slotIdx++) {
-        // 1. Lücken-Button (oder Vorschau nach Auflösung) rendern
         if (!state.turnResolved) {
           const slotBtn = document.createElement('button');
           slotBtn.type = 'button';
@@ -582,7 +597,6 @@
           slotBtn.addEventListener('click', () => handleSlotSelection(slotIdx));
           container.appendChild(slotBtn);
         } else if (state.lastPlacedSlot === slotIdx && !state.lastPlacementValid) {
-          // Wenn falsch geraten wurde: Zeige kurz rot gestrichelt, wo der Spieler getippt hat
           const wrongGhost = document.createElement('div');
           wrongGhost.className = 'shrink-0 h-36 w-36 rounded-2xl border-2 border-dashed border-rose-500 bg-rose-950/40 p-3 flex flex-col justify-between text-center';
           wrongGhost.innerHTML = `
@@ -593,7 +607,6 @@
           container.appendChild(wrongGhost);
         }
 
-        // 2. Ausliegende Karte rendern (falls vorhanden)
         if (slotIdx < cards.length) {
           const card = cards[slotIdx];
           const isNewlyWon = state.turnResolved && state.lastPlacementValid && state.lastPlacedSlot === slotIdx;
@@ -623,7 +636,7 @@
     }
 
     /****************************************************************
-     * 7. PRÜFLOGIK BEI LÜCKEN-AUSWAHL (HITSTER-REGEL)
+     * 7. PRÜFLOGIK BEI LÜCKEN-AUSWAHL
      ****************************************************************/
     function handleSlotSelection(slotIdx) {
       if (state.turnResolved) return;
@@ -634,19 +647,14 @@
       const cards = player.cards;
       const songYear = state.currentSong.year;
 
-      // Nachbarjahre links und rechts der gewählten Lücke bestimmen
       const leftYear = slotIdx === 0 ? -Infinity : cards[slotIdx - 1].year;
       const rightYear = slotIdx === cards.length ? Infinity : cards[slotIdx].year;
 
-      // Offizielle Regel: Gleiche Jahreszahl davor oder danach ist erlaubt (<=)
       const isCorrect = songYear >= leftYear && songYear <= rightYear;
       state.lastPlacementValid = isCorrect;
 
       if (isCorrect) {
-        // Karte direkt an dieser Position in die Timeline einfügen
         cards.splice(slotIdx, 0, state.currentSong);
-
-        // Prüfen, ob das Spielziel (z.B. 10 Karten) erreicht wurde
         if (cards.length >= state.targetScore) {
           state.finalRoundTriggered = true;
         }
@@ -677,7 +685,6 @@
       document.getElementById('reveal-title').textContent = state.currentSong.title;
       document.getElementById('reveal-artist').textContent = state.currentSong.artist;
 
-      // Prüfen, ob dies der letzte Zug der letzten Runde war
       const isLastPlayerInRound = state.activePlayerIdx === state.players.length - 1;
       const nextBtn = document.getElementById('next-turn-btn');
       if (state.finalRoundTriggered && isLastPlayerInRound) {
@@ -692,13 +699,10 @@
      * 8. SPIELERWECHSEL & SPIELENDE
      ****************************************************************/
     document.getElementById('next-turn-btn').addEventListener('click', () => {
-      if (ytReady && ytPlayer) {
-        ytPlayer.stopVideo();
-      }
+      if (ytReady && ytPlayer) ytPlayer.stopVideo();
 
       const isLastPlayerInRound = state.activePlayerIdx === state.players.length - 1;
 
-      // Wenn jemand >= 10 Karten hat UND die aktuelle Runde komplett zu Ende gespielt wurde:
       if (state.finalRoundTriggered && isLastPlayerInRound) {
         finishGame();
         return;
@@ -715,9 +719,7 @@
     });
 
     function finishGame() {
-      if (ytReady && ytPlayer) {
-        ytPlayer.stopVideo();
-      }
+      if (ytReady && ytPlayer) ytPlayer.stopVideo();
 
       document.getElementById('game-screen').classList.add('hidden');
       document.getElementById('gameover-screen').classList.remove('hidden');
@@ -797,7 +799,7 @@
       setTimeout(() => toast.classList.add('hidden'), 2800);
     }
 
-    // Initialisierung beim Laden der Seite
+    // Initialisierung
     renderPlayerInputs();
     loadSelectedGitHubPlaylist();
   </script>
