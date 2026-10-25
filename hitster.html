@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Hitster Digital – iPad Edition</title>
+  <title>Hitster Digital v3.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
   <style>
     body {
       user-select: none;
@@ -16,7 +15,6 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
     }
-    /* Unsichtbarer YT-Player für iPadOS */
     #yt-wrapper {
       position: fixed;
       bottom: 0;
@@ -40,7 +38,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans overflow-x-hidden">
 
-  <!-- Versteckter YouTube Player -->
+  <!-- Unsichtbarer YouTube Player -->
   <div id="yt-wrapper">
     <div id="yt-player"></div>
   </div>
@@ -52,18 +50,20 @@
   <!-- VIEW 1: SETUP SCREEN                                      -->
   <!-- ========================================================= -->
   <main id="setup-screen" class="flex-1 flex items-center justify-center p-6">
-    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-8">
-      <div class="text-center space-y-2">
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-7">
+      <div class="text-center space-y-1">
+        <div class="inline-block text-[11px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-3 py-0.5 rounded-full mb-1">
+          Version 3.0 • Regex-Parser
+        </div>
         <h1 class="text-4xl font-black tracking-tight bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
           HITSTER DIGITAL
         </h1>
-        <p class="text-slate-400 text-sm">One-Page Multiplayer Edition</p>
       </div>
 
       <!-- 1. Playlist Auswahl -->
       <div class="space-y-3 bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
         <label class="block text-sm font-bold uppercase tracking-wider text-cyan-400">
-          1. Musik-Deck (CSV) wählen
+          1. Musik-Deck wählen
         </label>
         
         <select id="playlist-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400">
@@ -75,13 +75,31 @@
           <option value="hitster-de-aaaa0026.csv">Hitster DE – Movies & TV Soundtracks</option>
           <option value="hitster-de-aaaa0025.csv">Hitster DE – Bayern 1</option>
           <option value="hitster-de-aaaa0054.csv">Hitster DE – Platinum Edition</option>
+          <option value="BUILTIN">⚡ Integriertes Offline-Deck (40 Klassiker – Sofort spielbar)</option>
         </select>
 
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
-          <span class="text-xs text-slate-400">Oder eigene CSV-Datei vom Gerät laden:</span>
-          <input type="file" id="csv-file-input" accept=".csv,.txt" class="text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700" />
+        <!-- Lokaler Datei-Upload -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+          <span class="text-xs text-slate-400">Lokale CSV-Datei wählen:</span>
+          <input type="file" id="csv-file-input" accept=".csv,.txt" class="text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700 cursor-pointer" />
         </div>
-        <div id="deck-status" class="text-xs font-medium text-emerald-400 pt-1"></div>
+
+        <!-- Optionales Copy-Paste Feld -->
+        <details class="text-xs text-slate-400 pt-1">
+          <summary class="cursor-pointer hover:text-cyan-400 font-medium">
+            Alternativ: CSV-Text direkt per Copy & Paste einfügen
+          </summary>
+          <div class="mt-2 space-y-2">
+            <textarea id="csv-paste-area" rows="3" placeholder="Hier den Inhalt der CSV reinkopieren..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 font-mono"></textarea>
+            <button id="parse-paste-btn" type="button" class="px-4 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">
+              Text einlesen
+            </button>
+          </div>
+        </details>
+
+        <!-- Status & Diagnose-Anzeige -->
+        <div id="deck-status" class="text-xs font-bold text-emerald-400 pt-2"></div>
+        <pre id="deck-debug" class="hidden text-[11px] bg-slate-900 border border-slate-800 text-slate-400 p-2.5 rounded-xl overflow-x-auto whitespace-pre-wrap"></pre>
       </div>
 
       <!-- 2. Spieler Konfiguration -->
@@ -125,7 +143,6 @@
   <!-- ========================================================= -->
   <div id="game-screen" class="hidden flex-1 flex flex-col justify-between h-screen overflow-hidden">
     
-    <!-- TOP BAR: DASHBOARD -->
     <header class="bg-slate-900/90 border-b border-slate-800 px-6 py-3 flex flex-wrap items-center justify-between gap-4 shrink-0">
       <div class="flex items-center gap-3">
         <span class="font-black text-lg bg-gradient-to-r from-pink-500 to-cyan-400 bg-clip-text text-transparent">HITSTER</span>
@@ -143,7 +160,6 @@
       </button>
     </header>
 
-    <!-- CENTER: AKTUELLER SPIELER & AUDIO PLAYER / AUFLÖSUNG -->
     <section class="flex-1 flex flex-col items-center justify-center px-6 py-2 overflow-y-auto">
       <div class="w-full max-w-3xl text-center space-y-4">
         
@@ -198,7 +214,6 @@
       </div>
     </section>
 
-    <!-- BOTTOM: TIMELINE DES AKTUELLEN SPIELERS -->
     <section class="bg-slate-900/95 border-t border-slate-800 p-4 shrink-0">
       <div class="flex items-center justify-between mb-2 px-2">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
@@ -230,6 +245,51 @@
   </div>
 
   <script>
+    /****************************************************************
+     * 0. INTEGRIERTES OFFLINE-FALLBACK-DECK (40 HITSTER KLASSIKER)
+     ****************************************************************/
+    const BUILTIN_CSV = `Card#, Title, Artist, Year, URL
+1, Take On Me, a-ha, 1985, https://www.youtube.com/watch?v=djV11Xbc914
+2, Billie Jean, Michael Jackson, 1982, https://www.youtube.com/watch?v=Zi_XLOBDo_Y
+3, Dancing Queen, ABBA, 1976, https://www.youtube.com/watch?v=xFrGuyw1V8s
+4, Smells Like Teen Spirit, Nirvana, 1991, https://www.youtube.com/watch?v=hTWKbfoikeg
+5, Bohemian Rhapsody, Queen, 1975, https://www.youtube.com/watch?v=fJ9rUzIMcZQ
+6, 99 Luftballons, Nena, 1983, https://www.youtube.com/watch?v=Fpu5a0Bl8eY
+7, Wonderwall, Oasis, 1995, https://www.youtube.com/watch?v=bx1Bh8ZvH84
+8, Blinding Lights, The Weeknd, 2019, https://www.youtube.com/watch?v=4NRXx6U8ABQ
+9, Rolling in the Deep, Adele, 2010, https://www.youtube.com/watch?v=rYEDA3JcQqw
+10, Seven Nation Army, The White Stripes, 2003, https://www.youtube.com/watch?v=0J2QdDbelmY
+11, Lose Yourself, Eminem, 2002, https://www.youtube.com/watch?v=_Yhyp-_hX2s
+12, Sweet Dreams (Are Made of This), Eurythmics, 1983, https://www.youtube.com/watch?v=qeMFqkcPYcg
+13, Africa, Toto, 1982, https://www.youtube.com/watch?v=FTQbiNvZqaY
+14, Eye of the Tiger, Survivor, 1982, https://www.youtube.com/watch?v=btPJPFnesV4
+15, Every Breath You Take, The Police, 1983, https://www.youtube.com/watch?v=OMOGaugKpzs
+16, Mr. Brightside, The Killers, 2003, https://www.youtube.com/watch?v=gGdGFtwCNBE
+17, Uptown Funk, Mark Ronson ft. Bruno Mars, 2014, https://www.youtube.com/watch?v=OPf0YbXqDm0
+18, Shape of You, Ed Sheeran, 2017, https://www.youtube.com/watch?v=JGwWNGJdvx8
+19, Bad Guy, Billie Eilish, 2019, https://www.youtube.com/watch?v=DyDfgMOUjCI
+20, Stayin' Alive, Bee Gees, 1977, https://www.youtube.com/watch?v=fNFzfwLM72c
+21, Hotel California, Eagles, 1976, https://www.youtube.com/watch?v=09839DpTctU
+22, Wannabe, Spice Girls, 1996, https://www.youtube.com/watch?v=gJLIiF15wjQ
+23, ...Baby One More Time, Britney Spears, 1998, https://www.youtube.com/watch?v=C-u5WLJ9Yk4
+24, In the End, Linkin Park, 2000, https://www.youtube.com/watch?v=eVTXPUF4Oz4
+25, Hips Don't Lie, Shakira, 2006, https://www.youtube.com/watch?v=DUT5rEU6pqM
+26, Crazy in Love, Beyoncé, 2003, https://www.youtube.com/watch?v=ViwtNLUqkMY
+27, Poker Face, Lady Gaga, 2008, https://www.youtube.com/watch?v=bESGLojNYSo
+28, Viva La Vida, Coldplay, 2008, https://www.youtube.com/watch?v=dvgZkm1xWPE
+29, Levels, Avicii, 2011, https://www.youtube.com/watch?v=_ovdm2yX4MA
+30, Somebody That I Used to Know, Gotye, 2011, https://www.youtube.com/watch?v=8UVNT4wvIGY
+31, Get Lucky, Daft Punk, 2013, https://www.youtube.com/watch?v=5NV6Rdv1a3I
+32, Happy, Pharrell Williams, 2013, https://www.youtube.com/watch?v=ZbZSe6N_BXs
+33, Major Tom (Völlig losgelöst), Peter Schilling, 1982, https://www.youtube.com/watch?v=KQRaj1vcnrs
+34, Skandal im Sperrbezirk, Spider Murphy Gang, 1981, https://www.youtube.com/watch?v=9lGwr_g6hks
+35, Männer, Herbert Grönemeyer, 1984, https://www.youtube.com/watch?v=UEJNMkEr1Ls
+36, Jeanny, Falco, 1985, https://www.youtube.com/watch?v=Urw-iutHw5E
+37, Durch den Monsun, Tokio Hotel, 2005, https://www.youtube.com/watch?v=S_Sy5-sO2A0
+38, Haus am See, Peter Fox, 2008, https://www.youtube.com/watch?v=gMqIuAJ92tM
+39, Atemlos durch die Nacht, Helene Fischer, 2013, https://www.youtube.com/watch?v=haECT-SerHk
+40, Komet, Udo Lindenberg & Apache 207, 2023, https://www.youtube.com/watch?v=RpCycle9c9I`;
+
     /****************************************************************
      * 1. STATE MANAGEMENT
      ****************************************************************/
@@ -298,119 +358,175 @@
     }
 
     /****************************************************************
-     * 3. ROBUSTES CSV PARSING (INKL. LEERZEICHEN-TRIM & FALLBACK)
+     * 3. ULTRA-ROBUSTER ZEILEN-SCANNER (KOMPLETT OHNE PAPAPARSE!)
+     *    Findet in jeder Zeile automatisch YouTube-ID, Jahr, Titel & Artist
      ****************************************************************/
-    function extractYouTubeId(str) {
-      if (!str) return null;
-      const cleaned = str.replace(/\s+/g, '');
-      const match = cleaned.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
-      return match ? match[1] : null;
+    function splitCSVLine(line, delimiter) {
+      const cols = [];
+      let cur = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === delimiter && !inQuotes) {
+          cols.push(cur.trim());
+          cur = '';
+        } else {
+          cur += ch;
+        }
+      }
+      cols.push(cur.trim());
+      return cols.map(c => c.replace(/^["']+|["']+$/g, '').trim());
     }
 
     function parseCSVContent(csvText, sourceLabel) {
       const statusEl = document.getElementById('deck-status');
+      const debugEl = document.getElementById('deck-debug');
+      debugEl.classList.add('hidden');
 
-      // Schutz: Prüfen, ob versehentlich eine GitHub-HTML-Seite statt Raw-CSV heruntergeladen wurde
-      if (csvText.trim().toLowerCase().startsWith('<!doctype html') || csvText.includes('<html')) {
-        state.rawSongs = [];
-        statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
-        statusEl.textContent = `❌ "${sourceLabel}" ist eine HTML-Webseite und keine Raw-CSV-Datei!`;
+      if (!csvText || typeof csvText !== 'string') {
+        statusEl.className = 'text-xs font-bold text-rose-400 pt-2';
+        statusEl.textContent = '❌ Leere Datei übergeben.';
         return;
       }
 
-      Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-        // WICHTIG: andygruber-CSVs haben Leerzeichen nach dem Komma (" Title", " Year", " URL")!
-        transformHeader: function (header) {
-          return header.replace(/^\uFEFF/, '').trim().toLowerCase();
-        },
-        complete: function (results) {
-          const validSongs = [];
+      // Prüfen, ob versehentlich eine GitHub-HTML-Webseite statt der Raw-CSV gespeichert wurde
+      if (csvText.trim().toLowerCase().startsWith('<!doctype') || csvText.includes('<html')) {
+        statusEl.className = 'text-xs font-bold text-rose-400 pt-2';
+        statusEl.textContent = `❌ "${sourceLabel}" ist eine HTML-Webseite (kein CSV)! Lade automatisch das integrierte Deck...`;
+        parseCSVContent(BUILTIN_CSV, 'Integriertes Notfall-Deck');
+        return;
+      }
 
-          for (const row of results.data) {
-            let title = (row['title'] || row['song'] || row['name'] || '').trim();
-            let artist = (row['artist'] || row['interpret'] || '').trim();
-            let yearStr = (row['year'] || row['jahr'] || '').toString().trim();
-            let url = (row['url'] || row['link'] || row['youtube'] || '').trim();
+      const lines = csvText.replace(/^\uFEFF/, '').split(/\r?\n/);
+      const validSongs = [];
 
-            // Fallback: Falls Spalten anders heißen, suche YouTube-Link & 4-stellige Jahreszahl automatisch
-            if (!url || !yearStr) {
-              for (const val of Object.values(row)) {
-                const s = String(val || '').trim();
-                if (!url && (s.includes('youtube.com') || s.includes('youtu.be'))) url = s;
-                if (!yearStr && /^(19\d\d|20[0-2]\d)$/.test(s)) yearStr = s;
-              }
-            }
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i].trim();
+        if (!rawLine) continue;
 
-            const year = parseInt(yearStr, 10);
-            const videoId = extractYouTubeId(url);
+        // 1. Suche YouTube-Video-ID irgendwo in der Zeile
+        const ytMatch = rawLine.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+        if (!ytMatch) continue; // Überspringt automatisch die Header-Zeile!
+        const videoId = ytMatch[1];
 
-            if (!isNaN(year) && year > 1850 && year <= 2030 && videoId) {
-              validSongs.push({
-                title: title || 'Unbekannter Titel',
-                artist: artist || 'Unbekannter Interpret',
-                year,
-                videoId
-              });
-            }
+        // 2. Ermittle Trennzeichen (Komma oder Semikolon)
+        const delimiter = (rawLine.split(';').length > rawLine.split(',').length) ? ';' : ',';
+        const cols = splitCSVLine(rawLine, delimiter);
+
+        // 3. Finde Spalte mit der 4-stelligen Jahreszahl (1920 - 2029)
+        let year = null;
+        let yearColIdx = -1;
+        for (let c = 0; c < cols.length; c++) {
+          if (/^(19[2-9]\d|20[0-2]\d)$/.test(cols[c])) {
+            year = parseInt(cols[c], 10);
+            yearColIdx = c;
+            break;
           }
-
-          state.rawSongs = validSongs;
-
-          if (validSongs.length > 0) {
-            statusEl.className = 'text-xs font-medium text-emerald-400 pt-1';
-            statusEl.textContent = `✓ ${validSongs.length} gültige Songs geladen (${sourceLabel})`;
-          } else {
-            const foundCols = results.meta && results.meta.fields ? results.meta.fields.join(', ') : 'keine';
-            statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
-            statusEl.textContent = `❌ 0 Songs mit YouTube-Link erkannt in "${sourceLabel}" (Gefundene Spalten: ${foundCols}).`;
-          }
-        },
-        error: function (err) {
-          statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
-          statusEl.textContent = '❌ Fehler beim Lesen der CSV: ' + err.message;
         }
-      });
+
+        // Fallback: Suche 4-stellige Jahreszahl direkt per Regex in der Zeile
+        if (!year) {
+          const yearFallback = rawLine.match(/(?:^|[,;\s])(19[2-9]\d|20[0-2]\d)(?:$|[,;\s])/);
+          if (yearFallback) year = parseInt(yearFallback[1], 10);
+        }
+
+        if (!year) continue;
+
+        // 4. Extrahiere die übrigen Text-Spalten als Titel & Interpret
+        const textCols = cols.filter((col, idx) => {
+          if (idx === yearColIdx) return false;
+          if (!col) return false;
+          if (col.includes('http') || col.includes('youtu')) return false;
+          if (/^\d{1,4}$/.test(col)) return false; // Reine Kartennummer (z.B. 001) ignorieren
+          if (/^aaaa\d+/i.test(col)) return false; // Hitster-SKU ignorieren
+          return true;
+        });
+
+        const title = textCols[0] || 'Unbekannter Song';
+        const artist = textCols[1] || '';
+
+        validSongs.push({ title, artist, year, videoId });
+      }
+
+      state.rawSongs = validSongs;
+
+      if (validSongs.length > 0) {
+        statusEl.className = 'text-xs font-bold text-emerald-400 pt-2';
+        statusEl.textContent = `✓ ${validSongs.length} gültige Songs geladen (${sourceLabel})`;
+      } else {
+        statusEl.className = 'text-xs font-bold text-rose-400 pt-2';
+        statusEl.textContent = `❌ 0 Songs in "${sourceLabel}" erkannt! Hier sind die ersten 3 Zeilen der Datei zur Diagnose:`;
+        debugEl.classList.remove('hidden');
+        debugEl.textContent = lines.slice(0, 3).join('\n');
+      }
     }
 
+    /****************************************************************
+     * 4. MULTI-CHANNEL GITHUB LOADER (MIT FIREFOX-BYPASS & FALLBACK)
+     ****************************************************************/
     async function loadSelectedGitHubPlaylist() {
       const select = document.getElementById('playlist-select');
       const fileName = select.value;
       const label = select.options[select.selectedIndex].text.trim();
       const statusEl = document.getElementById('deck-status');
-      
-      statusEl.className = 'text-xs font-medium text-amber-400 pt-1';
+
+      if (fileName === 'BUILTIN') {
+        parseCSVContent(BUILTIN_CSV, 'Integriertes Klassiker-Deck');
+        return;
+      }
+
+      statusEl.className = 'text-xs font-bold text-amber-400 pt-2';
       statusEl.textContent = `⏳ Lade "${label}"...`;
 
-      // Mehrere Spiegelserver (jsDelivr umgeht Brave-Shields-Blockaden auf github.io zuverlässig)
+      const cacheBuster = `?t=${Date.now()}`;
       const urlsToTry = [
-        `https://cdn.jsdelivr.net/gh/andygruber/songseeker-hitster-playlists@main/${fileName}`,
+        `./${fileName}${cacheBuster}`, // 1. Falls die CSV im eigenen GitHub-Repo liegt (gleiche Domain = nie blockiert!)
         `https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/${fileName}`,
-        `./${fileName}` // Falls du die CSV direkt mit in dein eigenes Repo legst
+        `https://cdn.jsdelivr.net/gh/andygruber/songseeker-hitster-playlists@main/${fileName}`,
+        `https://api.codetabs.com/v1/proxy?quest=https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/${fileName}`
       ];
 
       for (const url of urlsToTry) {
         try {
-          const res = await fetch(url, { cache: 'no-store' });
+          const res = await fetch(url);
           if (res.ok) {
             const text = await res.text();
-            if (text && text.length > 50 && !text.trim().toLowerCase().startsWith('<!doctype')) {
+            if (text && text.includes('youtu') && !text.trim().toLowerCase().startsWith('<!doctype')) {
               parseCSVContent(text, label);
               return;
             }
           }
         } catch (err) {
-          console.warn('Mirror fehlgeschlagen:', url, err);
+          console.warn('Mirror nicht erreichbar:', url);
         }
       }
 
-      statusEl.className = 'text-xs font-medium text-rose-400 pt-1';
-      statusEl.textContent = '❌ Online-Abruf blockiert. Bitte wähle die CSV-Datei über "Browse..." direkt aus.';
+      // Letzter Versuch: Über die offizielle GitHub REST API (Base64)
+      try {
+        const apiRes = await fetch(`https://api.github.com/repos/andygruber/songseeker-hitster-playlists/contents/${fileName}`);
+        if (apiRes.ok) {
+          const json = await apiRes.json();
+          if (json.content) {
+            const decoded = new TextDecoder('utf-8').decode(
+              Uint8Array.from(atob(json.content.replace(/\s/g, '')), c => c.charCodeAt(0))
+            );
+            parseCSVContent(decoded, label);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('GitHub API Fallback fehlgeschlagen:', e);
+      }
+
+      // Wenn Firefox alle externen Verbindungen blockiert: Lade sofort das integrierte Deck, damit man trotzdem direkt spielen kann!
+      parseCSVContent(BUILTIN_CSV, 'Integriertes Offline-Deck (da Firefox externe Downloads blockiert)');
     }
 
     /****************************************************************
-     * 4. SETUP UI (SPIELER & EVENTS)
+     * 5. SETUP UI (SPIELER & EVENTS)
      ****************************************************************/
     function renderPlayerInputs() {
       const container = document.getElementById('player-inputs');
@@ -460,11 +576,16 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (evt) => parseCSVContent(evt.target.result, file.name);
-      reader.readAsText(file);
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    document.getElementById('parse-paste-btn').addEventListener('click', () => {
+      const text = document.getElementById('csv-paste-area').value;
+      parseCSVContent(text, 'Manuelle Text-Eingabe');
     });
 
     /****************************************************************
-     * 5. SPIELSTART & RUNDENLOGIK
+     * 6. SPIELSTART & RUNDENLOGIK
      ****************************************************************/
     function shuffleArray(arr) {
       const copy = [...arr];
@@ -480,7 +601,7 @@
       const names = inputs.map((el, i) => el.value.trim() || `Spieler ${i + 1}`);
 
       if (state.rawSongs.length < names.length * 2) {
-        alert(`Es sind aktuell ${state.rawSongs.length} gültige Songs geladen. Bitte prüfe die Statusmeldung oben unter Punkt 1.`);
+        alert(`Es sind aktuell ${state.rawSongs.length} gültige Songs geladen. Bitte wähle oben ein Deck.`);
         return;
       }
 
@@ -542,7 +663,7 @@
     }
 
     /****************************************************************
-     * 6. DASHBOARD & TIMELINE RENDERING
+     * 7. DASHBOARD & TIMELINE RENDERING
      ****************************************************************/
     function renderDashboard() {
       const activePlayer = state.players[state.activePlayerIdx];
@@ -636,7 +757,7 @@
     }
 
     /****************************************************************
-     * 7. PRÜFLOGIK BEI LÜCKEN-AUSWAHL
+     * 8. PRÜFLOGIK BEI LÜCKEN-AUSWAHL
      ****************************************************************/
     function handleSlotSelection(slotIdx) {
       if (state.turnResolved) return;
@@ -696,7 +817,7 @@
     }
 
     /****************************************************************
-     * 8. SPIELERWECHSEL & SPIELENDE
+     * 9. SPIELERWECHSEL & SPIELENDE
      ****************************************************************/
     document.getElementById('next-turn-btn').addEventListener('click', () => {
       if (ytReady && ytPlayer) ytPlayer.stopVideo();
@@ -756,7 +877,7 @@
     }
 
     /****************************************************************
-     * 9. AUDIO BUTTON CONTROLS & HELPER
+     * 10. AUDIO BUTTON CONTROLS & HELPER
      ****************************************************************/
     document.getElementById('play-pause-btn').addEventListener('click', () => {
       if (!ytReady || !ytPlayer) return;
