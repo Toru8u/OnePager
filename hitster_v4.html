@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Hitster Digital v4.0</title>
+
+  <!-- PWA & iOS Home-Screen Meta-Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hitster" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#020617" />
+
+  <!-- Eingebettetes SVG App-Icon für iOS & Desktop -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23ec4899' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='120' fill='none' stroke='%2322d3ee' stroke-width='20'/%3E%3Ccircle cx='256' cy='256' r='45' fill='%23ec4899'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23ec4899' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='120' fill='none' stroke='%2322d3ee' stroke-width='20'/%3E%3Ccircle cx='256' cy='256' r='45' fill='%23ec4899'/%3E%3C/svg%3E" />
+  <link id="pwa-manifest" rel="manifest" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .timeline-scroll {
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .timeline-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    #yt-wrapper {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      opacity: 0.001;
+      pointer-events: none;
+      z-index: -50;
+      overflow: hidden;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.85; }
+      50% { transform: scale(1.05); opacity: 0.45; }
+      100% { transform: scale(0.95); opacity: 0.85; }
+    }
+    .playing-vinyl {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col font-sans">
+
+  <!-- Unsichtbarer YouTube Player -->
+  <div id="yt-wrapper">
+    <div id="yt-player"></div>
+  </div>
+
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-amber-500 text-slate-950 font-bold px-6 py-2.5 rounded-full shadow-2xl transition-all text-sm"></div>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 1: SETUP SCREEN                                      -->
+  <!-- ========================================================= -->
+  <main id="setup-screen" class="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 my-auto">
+      <div class="text-center space-y-1">
+        <div class="inline-block text-[11px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-3 py-0.5 rounded-full">
+          Version 4.0 • PWA & Fullscreen Edition
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          HITSTER DIGITAL
+        </h1>
+      </div>
+
+      <!-- 1. Playlist Auswahl -->
+      <div class="space-y-2.5 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <label class="block text-xs font-bold uppercase tracking-wider text-cyan-400">
+          1. Musik-Deck wählen
+        </label>
+        
+        <select id="playlist-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400">
+          <option value="hitster-de.csv" selected>Hitster Deutschland (Standard - hitster-de.csv)</option>
+          <option value="hitster-de-aaaa0012.csv">Hitster DE – Summer Party</option>
+          <option value="hitster-de-aaaa0015.csv">Hitster DE – Guilty Pleasures</option>
+          <option value="hitster-de-aaaa0007.csv">Hitster DE – Schlager Party</option>
+          <option value="hitster-de-aaaa0039.csv">Hitster DE – Rock</option>
+          <option value="hitster-de-aaaa0026.csv">Hitster DE – Movies & TV Soundtracks</option>
+          <option value="hitster-de-aaaa0025.csv">Hitster DE – Bayern 1</option>
+          <option value="hitster-de-aaaa0054.csv">Hitster DE – Platinum Edition</option>
+          <option value="BUILTIN">⚡ Integriertes Offline-Deck (Sofort spielbar)</option>
+        </select>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+          <span class="text-xs text-slate-400">Lokale CSV-Datei wählen:</span>
+          <input type="file" id="csv-file-input" accept=".csv,.txt" class="text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700 cursor-pointer" />
+        </div>
+
+        <details class="text-xs text-slate-400 pt-1">
+          <summary class="cursor-pointer hover:text-cyan-400 font-medium">
+            Alternativ: CSV-Text direkt per Copy & Paste einfügen
+          </summary>
+          <div class="mt-2 space-y-2">
+            <textarea id="csv-paste-area" rows="2" placeholder="Hier den Inhalt der CSV reinkopieren..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 font-mono"></textarea>
+            <button id="parse-paste-btn" type="button" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">
+              Text einlesen
+            </button>
+          </div>
+        </details>
+
+        <div id="deck-status" class="text-xs font-bold text-emerald-400 pt-1"></div>
+        <pre id="deck-debug" class="hidden text-[11px] bg-slate-900 border border-slate-800 text-slate-400 p-2 rounded-xl overflow-x-auto whitespace-pre-wrap"></pre>
+      </div>
+
+      <!-- 2. Spieler Konfiguration -->
+      <div class="space-y-2.5 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold uppercase tracking-wider text-pink-400">
+            2. Spieler
+          </label>
+          <button id="add-player-btn" type="button" class="text-xs bg-pink-500/20 text-pink-300 border border-pink-500/40 px-3 py-1 rounded-lg font-semibold active:scale-95 transition">
+            + Spieler hinzufügen
+          </button>
+        </div>
+        <div id="player-inputs" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
+      </div>
+
+      <!-- 3. Spielziel -->
+      <div class="flex items-center justify-between bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-purple-400">
+            3. Karten zum Sieg
+          </label>
+          <p class="text-[11px] text-slate-400">Inklusive Startkarte (Offiziell: 10)</p>
+        </div>
+        <select id="target-score-select" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white font-bold">
+          <option value="5" selected>5 Karten (Schnell)</option>
+          <option value="7">7 Karten (Mittel)</option>
+          <option value="10">10 Karten (Original)</option>
+          <option value="15">15 Karten (Lang)</option>
+        </select>
+      </div>
+
+      <button id="start-game-btn" type="button" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 hover:from-pink-500 hover:to-cyan-500 font-black text-lg tracking-wide shadow-lg active:scale-[0.99] transition">
+        SPIEL STARTEN
+      </button>
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 2: GAME SCREEN (KOMPAKT FÜR IPAD FULLSCREEN)         -->
+  <!-- ========================================================= -->
+  <div id="game-screen" class="hidden flex-1 flex flex-col justify-between h-[100dvh] overflow-hidden">
+    
+    <!-- TOP BAR -->
+    <header class="bg-slate-900/90 border-b border-slate-800 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div class="flex items-center gap-2.5">
+        <span class="font-black text-base bg-gradient-to-r from-pink-500 to-cyan-400 bg-clip-text text-transparent">HITSTER</span>
+        <span id="round-badge" class="text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full font-semibold">Runde 1</span>
+        <span id="deck-count-badge" class="text-xs text-slate-500"></span>
+        <span id="final-round-badge" class="hidden text-xs bg-amber-500/20 border border-amber-500 text-amber-300 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
+          ⚡ LETZTE RUNDE!
+        </span>
+      </div>
+
+      <div id="dashboard-players" class="flex items-center gap-2 overflow-x-auto py-0.5"></div>
+
+      <button id="abort-game-btn" class="text-xs text-slate-400 hover:text-rose-400 border border-slate-800 px-2.5 py-1 rounded-lg">
+        Beenden
+      </button>
+    </header>
+
+    <!-- MITTE: AKTIVER SPIELER & CONTROLS / ERGEBNIS -->
+    <section class="flex-1 flex flex-col items-center justify-center px-4 py-2 overflow-hidden">
+      <div class="w-full max-w-2xl text-center space-y-3">
+        
+        <div>
+          <p class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Aktuell am Zug</p>
+          <h2 id="active-player-name" class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            A
+          </h2>
+        </div>
+
+        <!-- PANEL WÄHREND DES RATENS -->
+        <div id="guessing-panel" class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+          <div class="flex flex-col items-center justify-center space-y-2">
+            <div id="vinyl-indicator" class="w-16 h-16 rounded-full bg-gradient-to-tr from-pink-600 via-purple-600 to-cyan-500 flex items-center justify-center shadow-lg">
+              <div class="w-6 h-6 rounded-full bg-slate-950 border-2 border-slate-700"></div>
+            </div>
+            <p id="audio-status-text" class="text-sm font-medium text-slate-300">
+              Höre dir den Song an und wähle unten die passende Lücke!
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-2.5">
+            <button id="play-pause-btn" type="button" class="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg active:scale-95 transition">
+              ▶ Play / Pause
+            </button>
+            <button id="restart-song-btn" type="button" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs active:scale-95 transition">
+              ↺ Von vorne
+            </button>
+            <button id="skip-broken-btn" type="button" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-rose-950 text-amber-400 border border-amber-500/30 font-semibold text-xs active:scale-95 transition">
+              ⏭ Song defekt / Ersatzkarte
+            </button>
+          </div>
+        </div>
+
+        <!-- PANEL BEI AUFLÖSUNG (MIT GRÖSSERER SCHRIFT FÜR TITEL & INTERPRET) -->
+        <div id="reveal-panel" class="hidden bg-slate-900 border-2 rounded-3xl p-5 shadow-2xl space-y-3">
+          <div id="reveal-verdict" class="text-xl sm:text-2xl font-black uppercase tracking-wider"></div>
+          
+          <div class="bg-slate-950/90 rounded-2xl p-4 border border-slate-800 max-w-lg mx-auto space-y-1.5">
+            <div id="reveal-year" class="text-4xl sm:text-5xl font-black text-cyan-400">1985</div>
+            <div id="reveal-title" class="text-2xl sm:text-3xl font-black text-white leading-tight pt-1">Song Title</div>
+            <div id="reveal-artist" class="text-lg sm:text-xl font-bold text-cyan-300/90">Artist Name</div>
+          </div>
+
+          <div class="pt-1">
+            <button id="next-turn-btn" type="button" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 font-black text-base sm:text-lg text-white shadow-xl active:scale-95 transition">
+              Nächster Spieler ➔
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- UNTEN: TIMELINE MIT DYNAMISCHEN SCROLL-INDIKATOREN LINKS & RECHTS -->
+    <section class="bg-slate-900/95 border-t border-slate-800 py-3 px-4 shrink-0 relative">
+      <div class="flex items-center justify-between mb-1.5 px-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Timeline von <span id="timeline-owner-name" class="text-cyan-400"></span>
+        </span>
+        <span class="text-[11px] text-slate-500">Wischen oder Pfeile nutzen ↔</span>
+      </div>
+
+      <div class="relative flex items-center">
+        <!-- Linker Scroll-Indikator (erscheint nur, wenn nach links scrollbar) -->
+        <div id="scroll-left-indicator" class="hidden absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent z-20 flex items-center justify-start pl-1 pointer-events-none">
+          <button id="scroll-left-btn" type="button" class="pointer-events-auto w-10 h-10 rounded-full bg-slate-800/95 border border-cyan-500/50 text-cyan-400 font-black shadow-lg active:scale-90 flex items-center justify-center">
+            ◀
+          </button>
+        </div>
+
+        <!-- Scrollbarer Karten-Container -->
+        <div id="timeline-container" class="timeline-scroll flex items-center gap-2.5 overflow-x-auto py-2 px-3 min-h-[142px] w-full"></div>
+
+        <!-- Rechter Scroll-Indikator (erscheint nur, wenn nach rechts scrollbar) -->
+        <div id="scroll-right-indicator" class="hidden absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-slate-950 via-slate-900/90 to-transparent z-20 flex items-center justify-end pr-1 pointer-events-none">
+          <button id="scroll-right-btn" type="button" class="pointer-events-auto w-10 h-10 rounded-full bg-slate-800/95 border border-cyan-500/50 text-cyan-400 font-black shadow-lg active:scale-90 flex items-center justify-center">
+            ▶
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 3: GAME OVER / SIEGEREHRUNG                          -->
+  <!-- ========================================================= -->
+  <div id="gameover-screen" class="hidden flex-1 flex items-center justify-center p-6">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-7 text-center shadow-2xl space-y-5">
+      <div class="text-5xl">🏆</div>
+      <h2 id="winner-headline" class="text-3xl font-black text-white">Spiel beendet!</h2>
+      <p id="winner-subline" class="text-slate-400 text-sm"></p>
+
+      <div id="leaderboard-list" class="space-y-2 text-left bg-slate-950 p-4 rounded-2xl border border-slate-800"></div>
+
+      <button id="play-again-btn" type="button" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 font-black text-lg text-white shadow-lg active:scale-95 transition">
+        Neues Spiel konfigurieren
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /****************************************************************
+     * 0. SINGLE-FILE PWA MANIFEST & SERVICE WORKER INITIALISIERUNG
+     ****************************************************************/
+    (function setupPWA() {
+      const iconSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23ec4899' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='120' fill='none' stroke='%2322d3ee' stroke-width='20'/%3E%3Ccircle cx='256' cy='256' r='45' fill='%23ec4899'/%3E%3C/svg%3E";
+      const manifest = {
+        name: "Hitster Digital Multiplayer",
+        short_name: "Hitster",
+        description: "Multiplayer Musik-Jahreszahlen-Spiel",
+        start_url: window.location.href,
+        display: "standalone",
+        orientation: "any",
+        background_color: "#020617",
+        theme_color: "#020617",
+        icons: [{ src: iconSvg, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+    })();
+
+    /****************************************************************
+     * 1. WEB AUDIO API SOUND-SYNTHESIZER (KEINE EXTERNEN MP3 NÖTIG)
+     ****************************************************************/
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playFeedbackSound(isSuccess) {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (isSuccess) {
+          // Positiver Dur-Dreiklang (C5 -> E5 -> G5 -> C6)
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.001, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.25, now + idx * 0.08 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.3);
+          });
+        } else {
+          // Kurzer abfallender Verlierer-Sound (Zwei tiefe Sägezahn-Töne)
+          const notes = [220, 155.56]; // A3 -> D#3
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.18);
+            osc.frequency.linearRampToValueAtTime(freq - 20, now + idx * 0.18 + 0.22);
+
+            gain.gain.setValueAtTime(0.001, now + idx * 0.18);
+            gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.18 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.25);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.18);
+            osc.stop(now + idx * 0.18 + 0.26);
+          });
+        }
+      } catch (e) {
+        console.warn('Audio Feedback nicht möglich:', e);
+      }
+    }
+
+    /****************************************************************
+     * 2. INTEGRIERTES OFFLINE-DECK & STATE
+     ****************************************************************/
+    const BUILTIN_CSV = `Card#,Artist,Title,URL,Hashed Info,Youtube-Title,Year
+1,Rudi Carrell,Wann wird's mal wieder richtig Sommer,https://www.youtube.com/watch?v=KzEOvyDcVas,d0f3c7b77482fd3fccc86921ce073fceba3694398e8848562096b598890c1374,Rudi Carrell - Wann wird's mal wieder richtig Sommer 1975,1975
+2,Paul Simon,You Can Call Me Al,https://www.youtube.com/watch?v=uq-gYOrU8bA,f18367a706ebd69b473142ed8183acfb4b31fb5e46a1df190e10e9ac26537021,Paul Simon - You Can Call Me Al (Official Video),1986
+3,The Rolling Stones,Start Me Up,https://www.youtube.com/watch?v=SGyOaCXr8Lw,9500a2d94fa3bb940e28485809007c57884dda26a5830dd428d8e28eea69636a,The Rolling Stones - Start Me Up - Official Promo,1981
+4,Chubby Checker,The Twist,https://www.youtube.com/watch?v=-CCgDvUM4TM,3e45f1259620f3c41277f13823d65da880a07a474afb1489b8417eb4c6016734,Chubby Checker - The Twist (Official Music Video),1960
+5,"Robin Thicke feat. T.I. & Pharrell Williams",Blurred Lines,https://www.youtube.com/watch?v=yyDUC1LUXSU,4da6f532aa06536be873853777f10a693c62466f35f42bac7af54d87c54614a0,"Robin Thicke - Blurred Lines ft. T.I., Pharrell",2013
+6,"Taio Cruz, Flo Rida",Hangover,https://www.youtube.com/watch?v=dLhFDYQHDQY,c4aa2ccfd66926a5ae4c273a8caf635d9959af3a4dc0724337840fbf69c96cfe,Taio Cruz - Hangover (Official Video) ft. Flo Rida,2011
+7,Daft Punk,One More Time,https://www.youtube.com/watch?v=FGBhQbmPwH8,815f58b1e83dcd6d2a6e82e8974132bc4e619a9e458f5c433431ce48c84aa43b,Daft Punk - One More Time (Official Video),2000
+8,T'Pau,China In Your Hand,https://www.youtube.com/watch?v=T4sV3lqzKqQ,e1d6ad946adc9a31ad1d5ce5bc6bf508317921b88f1ce92f3f02cf2c029d8878,T'Pau - China In Your Hand,1987
+9,Tina Turner,The Best,https://www.youtube.com/watch?v=GC5E8ie2pdM,7794409f5e2c0f84087cc3ce8ead2b0baa81737fda543a7865756d6fc9fcb8a2,Tina Turner - The Best (Official Music Video) [HD Upgrade],1989
+10,Van McCoy & The Soul City Symphony,The Hustle,https://www.youtube.com/watch?v=SFzMs2SN--s,79924af33f66477dbbb36f46c7ab117ee17f6fc3e51c0c8810d3c40bbe588054,Van McCoy - The Hustle (Official Music Video) [HD],1975`;
+
+    const state = {
+      rawSongs: [],
+      deck: [],
+      players: [],
+      activePlayerIdx: 0,
+      round: 1,
+      targetScore: 5,
+      finalRoundTriggered: false,
+      currentSong: null,
+      turnResolved: false,
+      lastPlacedSlot: null,
+      lastPlacementValid: false
+    };
+
+    let ytPlayer = null;
+    let ytReady = false;
+    let defaultPlayerNames = ['A', 'B', 'C'];
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = function () {
+      ytPlayer = new YT.Player('yt-player', {
+        height: '200',
+        width: '200',
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
+        events: {
+          onReady: () => { ytReady = true; },
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+    };
+
+    function onPlayerStateChange(event) {
+      const vinyl = document.getElementById('vinyl-indicator');
+      const statusText = document.getElementById('audio-status-text');
+      if (event.data === YT.PlayerState.PLAYING) {
+        vinyl.classList.add('playing-vinyl');
+        statusText.textContent = '🎵 Song läuft... Wo gehört das Erscheinungsjahr hin?';
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        vinyl.classList.remove('playing-vinyl');
+        statusText.textContent = '⏸ Pausiert – Klicke auf Play zum Weiterhören.';
+      }
+    }
+
+    function onPlayerError() {
+      if (document.getElementById('game-screen').classList.contains('hidden')) return;
+      showToast('⚠️ YouTube-Video gesperrt/nicht verfügbar – ziehe Ersatzkarte...');
+      setTimeout(() => drawReplacementSong(), 900);
+    }
+
+    /****************************************************************
+     * 3. CSV-QUOTE-PARSER
+     ****************************************************************/
+    function parseCSVLine(line) {
+      const cols = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+          cols.push(cur.trim());
+          cur = '';
+        } else {
+          cur += ch;
+        }
+      }
+      cols.push(cur.trim());
+      return cols.map(c => c.replace(/^["']+|["']+$/g, '').trim());
+    }
+
+    function parseCSVContent(csvText, sourceLabel) {
+      const statusEl = document.getElementById('deck-status');
+      const debugEl = document.getElementById('deck-debug');
+      debugEl.classList.add('hidden');
+
+      if (!csvText || typeof csvText !== 'string') {
+        statusEl.className = 'text-xs font-bold text-rose-400 pt-1';
+        statusEl.textContent = '❌ Leere Datei übergeben.';
+        return;
+      }
+
+      if (csvText.trim().toLowerCase().startsWith('<!doctype') || csvText.includes('<html')) {
+        statusEl.className = 'text-xs font-bold text-rose-400 pt-1';
+        statusEl.textContent = `❌ "${sourceLabel}" ist eine HTML-Webseite! Lade integriertes Deck...`;
+        parseCSVContent(BUILTIN_CSV, 'Integriertes Notfall-Deck');
+        return;
+      }
+
+      const lines = csvText.replace(/^\uFEFF/, '').split(/\r?\n/);
+      const validSongs = [];
+      let headers = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i].trim();
+        if (!rawLine) continue;
+
+        const cols = parseCSVLine(rawLine);
+
+        if (i === 0 && (cols.some(c => c.toLowerCase().includes('title') || c.toLowerCase().includes('artist') || c.toLowerCase().includes('year')))) {
+          headers = cols.map(h => h.toLowerCase());
+          continue;
+        }
+
+        let titleIdx = headers.indexOf('title');
+        if (titleIdx === -1) titleIdx = 2;
+
+        let artistIdx = headers.indexOf('artist');
+        if (artistIdx === -1) artistIdx = 1;
+
+        let yearIdx = headers.indexOf('year');
+        if (yearIdx === -1) yearIdx = cols.length - 1;
+
+        let urlIdx = headers.indexOf('url');
+        if (urlIdx === -1) {
+          urlIdx = cols.findIndex(c => c.includes('youtube.com') || c.includes('youtu.be'));
+        }
+
+        const title = cols[titleIdx] || cols[2] || 'Unbekannter Song';
+        const artist = cols[artistIdx] || cols[1] || '';
+        const yearStr = cols[yearIdx] || cols[cols.length - 1] || '';
+        const urlField = (urlIdx !== -1 ? cols[urlIdx] : cols.find(c => c.includes('youtube'))) || '';
+
+        const year = parseInt(yearStr, 10);
+        const ytMatch = urlField.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+        const videoId = ytMatch ? ytMatch[1] : null;
+
+        if (!isNaN(year) && year > 1850 && year <= 2030 && videoId) {
+          validSongs.push({ title, artist, year, videoId });
+        }
+      }
+
+      state.rawSongs = validSongs;
+
+      if (validSongs.length > 0) {
+        statusEl.className = 'text-xs font-bold text-emerald-400 pt-1';
+        statusEl.textContent = `✓ ${validSongs.length} gültige Songs geladen (${sourceLabel})`;
+      } else {
+        statusEl.className = 'text-xs font-bold text-rose-400 pt-1';
+        statusEl.textContent = `❌ 0 Songs in "${sourceLabel}" erkannt! Erste Zeilen zur Diagnose:`;
+        debugEl.classList.remove('hidden');
+        debugEl.textContent = lines.slice(0, 3).join('\n');
+      }
+    }
+
+    async function loadSelectedGitHubPlaylist() {
+      const select = document.getElementById('playlist-select');
+      const fileName = select.value;
+      const label = select.options[select.selectedIndex].text.trim();
+      const statusEl = document.getElementById('deck-status');
+
+      if (fileName === 'BUILTIN') {
+        parseCSVContent(BUILTIN_CSV, 'Integriertes Offline-Deck');
+        return;
+      }
+
+      statusEl.className = 'text-xs font-bold text-amber-400 pt-1';
+      statusEl.textContent = `⏳ Lade "${label}"...`;
+
+      const cacheBuster = `?t=${Date.now()}`;
+      const urlsToTry = [
+        `./${fileName}${cacheBuster}`,
+        `https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/${fileName}`,
+        `https://cdn.jsdelivr.net/gh/andygruber/songseeker-hitster-playlists@main/${fileName}`
+      ];
+
+      for (const url of urlsToTry) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.includes('youtube') && !text.trim().toLowerCase().startsWith('<!doctype')) {
+              parseCSVContent(text, label);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Fetch fehlgeschlagen:', url);
+        }
+      }
+
+      parseCSVContent(BUILTIN_CSV, 'Integriertes Offline-Deck (Fallback aktiv)');
+    }
+
+    /****************************************************************
+     * 4. SETUP UI & EVENTS
+     ****************************************************************/
+    function renderPlayerInputs() {
+      const container = document.getElementById('player-inputs');
+      container.innerHTML = '';
+      defaultPlayerNames.forEach((name, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center gap-1.5';
+        wrapper.innerHTML = `
+          <input type="text" value="${name}" data-idx="${idx}" placeholder="Spieler ${idx + 1}"
+            class="player-name-input w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500" />
+          ${defaultPlayerNames.length > 1 ? `
+            <button type="button" data-remove="${idx}" class="remove-player-btn px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 text-xs">
+              ✕
+            </button>
+          ` : ''}
+        `;
+        container.appendChild(wrapper);
+      });
+
+      container.querySelectorAll('.player-name-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          defaultPlayerNames[parseInt(e.target.dataset.idx, 10)] = e.target.value;
+        });
+      });
+
+      container.querySelectorAll('.remove-player-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const rmIdx = parseInt(e.currentTarget.dataset.remove, 10);
+          defaultPlayerNames.splice(rmIdx, 1);
+          renderPlayerInputs();
+        });
+      });
+    }
+
+    document.getElementById('add-player-btn').addEventListener('click', () => {
+      defaultPlayerNames.push(`Spieler ${defaultPlayerNames.length + 1}`);
+      renderPlayerInputs();
+    });
+
+    document.getElementById('playlist-select').addEventListener('change', () => {
+      document.getElementById('csv-file-input').value = '';
+      loadSelectedGitHubPlaylist();
+    });
+
+    document.getElementById('csv-file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => parseCSVContent(evt.target.result, file.name);
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    document.getElementById('parse-paste-btn').addEventListener('click', () => {
+      const text = document.getElementById('csv-paste-area').value;
+      parseCSVContent(text, 'Manuelle Text-Eingabe');
+    });
+
+    /****************************************************************
+     * 5. SPIELSTART & RUNDENLOGIK
+     ****************************************************************/
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    document.getElementById('start-game-btn').addEventListener('click', () => {
+      getAudioContext(); // Entsperrt Web Audio API auf iPadOS beim ersten Touch
+      const inputs = [...document.querySelectorAll('.player-name-input')];
+      const names = inputs.map((el, i) => el.value.trim() || `Spieler ${i + 1}`);
+
+      if (state.rawSongs.length < names.length * 2) {
+        alert(`Es sind aktuell ${state.rawSongs.length} gültige Songs geladen.`);
+        return;
+      }
+
+      state.targetScore = parseInt(document.getElementById('target-score-select').value, 10);
+      state.deck = shuffleArray(state.rawSongs);
+      state.round = 1;
+      state.activePlayerIdx = 0;
+      state.finalRoundTriggered = false;
+
+      state.players = names.map(name => ({
+        name,
+        cards: [state.deck.pop()]
+      }));
+
+      document.getElementById('setup-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+
+      startPlayerTurn();
+    });
+
+    function startPlayerTurn() {
+      if (state.deck.length === 0) {
+        finishGame();
+        return;
+      }
+
+      state.turnResolved = false;
+      state.lastPlacedSlot = null;
+      state.currentSong = state.deck.pop();
+
+      document.getElementById('guessing-panel').classList.remove('hidden');
+      document.getElementById('reveal-panel').classList.add('hidden');
+      document.getElementById('audio-status-text').textContent = 'Lade Song... (Falls kein Ton kommt, auf Play tippen)';
+
+      renderDashboard();
+      renderTimeline();
+      loadAndPlayCurrentSong();
+    }
+
+    function loadAndPlayCurrentSong() {
+      if (!ytReady || !ytPlayer || !state.currentSong) return;
+      try {
+        ytPlayer.loadVideoById(state.currentSong.videoId);
+        ytPlayer.playVideo();
+      } catch (e) {
+        console.warn('YT Play Error:', e);
+      }
+    }
+
+    function drawReplacementSong() {
+      if (state.deck.length === 0) {
+        alert('Keine Karten mehr im Nachziehstapel!');
+        return;
+      }
+      state.currentSong = state.deck.pop();
+      renderDashboard();
+      loadAndPlayCurrentSong();
+    }
+
+    /****************************************************************
+     * 6. DASHBOARD, TIMELINE & DYNAMISCHE SCROLL-INDIKATOREN
+     ****************************************************************/
+    function renderDashboard() {
+      const activePlayer = state.players[state.activePlayerIdx];
+      document.getElementById('active-player-name').textContent = activePlayer.name;
+      document.getElementById('timeline-owner-name').textContent = activePlayer.name;
+      document.getElementById('round-badge').textContent = `Runde ${state.round}`;
+      document.getElementById('deck-count-badge').textContent = `(${state.deck.length} im Deck)`;
+
+      const finalBadge = document.getElementById('final-round-badge');
+      if (state.finalRoundTriggered) {
+        finalBadge.classList.remove('hidden');
+      } else {
+        finalBadge.classList.add('hidden');
+      }
+
+      const container = document.getElementById('dashboard-players');
+      container.innerHTML = '';
+
+      state.players.forEach((p, idx) => {
+        const isCurrent = idx === state.activePlayerIdx;
+        const pill = document.createElement('div');
+        pill.className = `px-3 py-1 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition shrink-0 ${
+          isCurrent
+            ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-md scale-105'
+            : 'bg-slate-800/70 border-slate-700 text-slate-400'
+        }`;
+        pill.innerHTML = `
+          <span>${p.name}</span>
+          <span class="px-1.5 py-0.5 rounded-md ${isCurrent ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900 text-slate-300'}">
+            ${p.cards.length} / ${state.targetScore}
+          </span>
+        `;
+        container.appendChild(pill);
+      });
+    }
+
+    function updateTimelineScrollIndicators() {
+      const container = document.getElementById('timeline-container');
+      const leftInd = document.getElementById('scroll-left-indicator');
+      const rightInd = document.getElementById('scroll-right-indicator');
+
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+
+      if (maxScrollLeft <= 4) {
+        // Nichts zu scrollen -> Beide Indikatoren verstecken
+        leftInd.classList.add('hidden');
+        rightInd.classList.add('hidden');
+        return;
+      }
+
+      if (container.scrollLeft > 8) {
+        leftInd.classList.remove('hidden');
+      } else {
+        leftInd.classList.add('hidden');
+      }
+
+      if (container.scrollLeft < maxScrollLeft - 8) {
+        rightInd.classList.remove('hidden');
+      } else {
+        rightInd.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('timeline-container').addEventListener('scroll', updateTimelineScrollIndicators);
+    window.addEventListener('resize', updateTimelineScrollIndicators);
+
+    document.getElementById('scroll-left-btn').addEventListener('click', () => {
+      document.getElementById('timeline-container').scrollBy({ left: -280, behavior: 'smooth' });
+    });
+
+    document.getElementById('scroll-right-btn').addEventListener('click', () => {
+      document.getElementById('timeline-container').scrollBy({ left: 280, behavior: 'smooth' });
+    });
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = '';
+      const player = state.players[state.activePlayerIdx];
+      const cards = player.cards;
+
+      for (let slotIdx = 0; slotIdx <= cards.length; slotIdx++) {
+        // Punkt 1: Kein "Hinzufügen"-Button zwischen zwei identischen Jahreszahlen!
+        const isBetweenIdenticalYears =
+          slotIdx > 0 &&
+          slotIdx < cards.length &&
+          cards[slotIdx - 1].year === cards[slotIdx].year;
+
+        if (!state.turnResolved && !isBetweenIdenticalYears) {
+          const slotBtn = document.createElement('button');
+          slotBtn.type = 'button';
+          slotBtn.className = 'shrink-0 h-32 w-16 sm:w-20 rounded-2xl border-2 border-dashed border-cyan-500/50 hover:border-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 active:scale-95 flex flex-col items-center justify-center gap-0.5 text-cyan-300 font-bold text-xs transition group';
+          slotBtn.innerHTML = `
+            <span class="text-xl group-hover:scale-125 transition">+</span>
+            <span>Hier</span>
+          `;
+          slotBtn.addEventListener('click', () => handleSlotSelection(slotIdx));
+          container.appendChild(slotBtn);
+        } else if (state.turnResolved && state.lastPlacedSlot === slotIdx && !state.lastPlacementValid) {
+          const wrongGhost = document.createElement('div');
+          wrongGhost.className = 'shrink-0 h-32 w-36 rounded-2xl border-2 border-dashed border-rose-500 bg-rose-950/40 p-3 flex flex-col justify-between text-center';
+          wrongGhost.innerHTML = `
+            <span class="text-[10px] uppercase font-bold text-rose-400">Falscher Tipp</span>
+            <div class="text-2xl font-black text-rose-400 line-through">${state.currentSong.year}</div>
+            <div class="text-[11px] text-rose-200 truncate">${state.currentSong.title}</div>
+          `;
+          container.appendChild(wrongGhost);
+        }
+
+        if (slotIdx < cards.length) {
+          const card = cards[slotIdx];
+          const isNewlyWon = state.turnResolved && state.lastPlacementValid && state.lastPlacedSlot === slotIdx;
+
+          const cardEl = document.createElement('div');
+          cardEl.className = `shrink-0 h-32 w-36 sm:w-40 rounded-2xl p-3 flex flex-col justify-between shadow-lg border transition ${
+            isNewlyWon
+              ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-105'
+              : 'bg-slate-800 border-slate-700'
+          }`;
+          cardEl.innerHTML = `
+            <div class="text-2xl sm:text-3xl font-black tracking-tight ${isNewlyWon ? 'text-emerald-400' : 'text-cyan-400'}">
+              ${card.year}
+            </div>
+            <div class="space-y-0.5">
+              <div class="text-xs font-bold text-white line-clamp-2 leading-tight" title="${card.title}">
+                ${card.title}
+              </div>
+              <div class="text-[11px] text-slate-400 truncate" title="${card.artist}">
+                ${card.artist}
+              </div>
+            </div>
+          `;
+          container.appendChild(cardEl);
+        }
+      }
+
+      // Nach dem Rendern prüfen, ob Scroll-Indikatoren benötigt werden
+      requestAnimationFrame(updateTimelineScrollIndicators);
+    }
+
+    /****************************************************************
+     * 7. PRÜFLOGIK BEI LÜCKEN-AUSWAHL & AKUSTISCHES FEEDBACK
+     ****************************************************************/
+    function handleSlotSelection(slotIdx) {
+      if (state.turnResolved) return;
+      state.turnResolved = true;
+      state.lastPlacedSlot = slotIdx;
+
+      const player = state.players[state.activePlayerIdx];
+      const cards = player.cards;
+      const songYear = state.currentSong.year;
+
+      const leftYear = slotIdx === 0 ? -Infinity : cards[slotIdx - 1].year;
+      const rightYear = slotIdx === cards.length ? Infinity : cards[slotIdx].year;
+
+      const isCorrect = songYear >= leftYear && songYear <= rightYear;
+      state.lastPlacementValid = isCorrect;
+
+      // Punkt 4: Akustisches Feedback abspielen
+      playFeedbackSound(isCorrect);
+
+      if (isCorrect) {
+        cards.splice(slotIdx, 0, state.currentSong);
+        if (cards.length >= state.targetScore) {
+          state.finalRoundTriggered = true;
+        }
+      }
+
+      showRevealPanel(isCorrect);
+      renderDashboard();
+      renderTimeline();
+    }
+
+    function showRevealPanel(isCorrect) {
+      document.getElementById('guessing-panel').classList.add('hidden');
+      const revealPanel = document.getElementById('reveal-panel');
+      const verdictEl = document.getElementById('reveal-verdict');
+
+      revealPanel.classList.remove('hidden', 'border-emerald-500', 'border-rose-500');
+      revealPanel.classList.add(isCorrect ? 'border-emerald-500' : 'border-rose-500');
+
+      if (isCorrect) {
+        verdictEl.textContent = '✓ RICHTIG EINGEORDNET!';
+        verdictEl.className = 'text-xl sm:text-2xl font-black uppercase tracking-wider text-emerald-400';
+      } else {
+        verdictEl.textContent = '✕ LEIDER FALSCH!';
+        verdictEl.className = 'text-xl sm:text-2xl font-black uppercase tracking-wider text-rose-400';
+      }
+
+      document.getElementById('reveal-year').textContent = state.currentSong.year;
+      document.getElementById('reveal-title').textContent = state.currentSong.title;
+      document.getElementById('reveal-artist').textContent = state.currentSong.artist;
+
+      const isLastPlayerInRound = state.activePlayerIdx === state.players.length - 1;
+      const nextBtn = document.getElementById('next-turn-btn');
+      if (state.finalRoundTriggered && isLastPlayerInRound) {
+        nextBtn.textContent = 'Satzende – Sieger anzeigen 🏆';
+      } else {
+        const nextPlayer = state.players[(state.activePlayerIdx + 1) % state.players.length];
+        nextBtn.textContent = `Weiter zu ${nextPlayer.name} ➔`;
+      }
+    }
+
+    /****************************************************************
+     * 8. SPIELERWECHSEL & SPIELENDE
+     ****************************************************************/
+    document.getElementById('next-turn-btn').addEventListener('click', () => {
+      if (ytReady && ytPlayer) ytPlayer.stopVideo();
+
+      const isLastPlayerInRound = state.activePlayerIdx === state.players.length - 1;
+
+      if (state.finalRoundTriggered && isLastPlayerInRound) {
+        finishGame();
+        return;
+      }
+
+      if (isLastPlayerInRound) {
+        state.activePlayerIdx = 0;
+        state.round += 1;
+      } else {
+        state.activePlayerIdx += 1;
+      }
+
+      startPlayerTurn();
+    });
+
+    function finishGame() {
+      if (ytReady && ytPlayer) ytPlayer.stopVideo();
+
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.remove('hidden');
+
+      const sorted = [...state.players].sort((a, b) => b.cards.length - a.cards.length);
+      const topScore = sorted[0].cards.length;
+      const winners = sorted.filter(p => p.cards.length === topScore);
+
+      const headline = document.getElementById('winner-headline');
+      const subline = document.getElementById('winner-subline');
+
+      if (winners.length === 1) {
+        headline.textContent = `${winners[0].name} gewinnt!`;
+        subline.textContent = `Mit ${topScore} richtig eingeordneten Karten nach ${state.round} Runden.`;
+      } else {
+        headline.textContent = `Unentschieden: ${winners.map(w => w.name).join(' & ')}!`;
+        subline.textContent = `Beide haben ${topScore} Karten nach Abschluss der letzten Runde.`;
+      }
+
+      const list = document.getElementById('leaderboard-list');
+      list.innerHTML = '';
+      sorted.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between px-4 py-3 rounded-xl bg-slate-900 border border-slate-800';
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="font-black text-slate-500 w-6">${idx + 1}.</span>
+            <span class="font-bold text-white">${p.name}</span>
+          </div>
+          <span class="font-black text-cyan-400">${p.cards.length} Karten</span>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    /****************************************************************
+     * 9. AUDIO CONTROLS & HELPER
+     ****************************************************************/
+    document.getElementById('play-pause-btn').addEventListener('click', () => {
+      if (!ytReady || !ytPlayer) return;
+      const playerState = ytPlayer.getPlayerState();
+      if (playerState === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    });
+
+    document.getElementById('restart-song-btn').addEventListener('click', () => {
+      if (!ytReady || !ytPlayer) return;
+      ytPlayer.seekTo(0, true);
+      ytPlayer.playVideo();
+    });
+
+    document.getElementById('skip-broken-btn').addEventListener('click', () => {
+      showToast('Ziehe Ersatzkarte für diesen Zug...');
+      drawReplacementSong();
+    });
+
+    document.getElementById('abort-game-btn').addEventListener('click', () => {
+      if (confirm('Aktuelles Spiel wirklich abbrechen?')) {
+        if (ytReady && ytPlayer) ytPlayer.stopVideo();
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('play-again-btn').addEventListener('click', () => {
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('setup-screen').classList.remove('hidden');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
+
+    renderPlayerInputs();
+    loadSelectedGitHubPlaylist();
+  </script>
+</body>
+</html>
