@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Hitster Digital v5.0</title>
+
+  <!-- PWA & iOS Home-Screen Meta-Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hitster" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#020617" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23ec4899' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='120' fill='none' stroke='%2322d3ee' stroke-width='20'/%3E%3Ccircle cx='256' cy='256' r='45' fill='%23ec4899'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23ec4899' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='120' fill='none' stroke='%2322d3ee' stroke-width='20'/%3E%3Ccircle cx='256' cy='256' r='45' fill='%23ec4899'/%3E%3C/svg%3E" />
+  <link id="pwa-manifest" rel="manifest" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .timeline-scroll {
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .timeline-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    #yt-wrapper {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      opacity: 0.001;
+      pointer-events: none;
+      z-index: -50;
+      overflow: hidden;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.85; }
+      50% { transform: scale(1.05); opacity: 0.45; }
+      100% { transform: scale(0.95); opacity: 0.85; }
+    }
+    .playing-vinyl {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col font-sans">
+
+  <!-- Unsichtbarer YouTube Player -->
+  <div id="yt-wrapper">
+    <div id="yt-player"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-amber-500 text-slate-950 font-bold px-6 py-2.5 rounded-full shadow-2xl transition-all text-sm"></div>
+
+  <!-- MODAL: Herausforderer auswählen / 3-Token-Kauf -->
+  <div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl text-center">
+      <h3 id="modal-title" class="text-xl font-black text-white">Aktion wählen</h3>
+      <p id="modal-subtitle" class="text-xs text-slate-400"></p>
+      <div id="modal-buttons" class="space-y-2 max-h-64 overflow-y-auto"></div>
+      <button id="modal-cancel-btn" type="button" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">
+        Abbrechen
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 1: SETUP SCREEN                                      -->
+  <!-- ========================================================= -->
+  <main id="setup-screen" class="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 my-auto">
+      <div class="text-center space-y-1">
+        <div class="inline-block text-[11px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-3 py-0.5 rounded-full">
+          Version 5.0 • Komplettes Original-Regelwerk & Tokens
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          HITSTER DIGITAL
+        </h1>
+      </div>
+
+      <!-- 1. Playlist Auswahl -->
+      <div class="space-y-2 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <label class="block text-xs font-bold uppercase tracking-wider text-cyan-400">
+          1. Musik-Deck wählen
+        </label>
+        
+        <select id="playlist-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-400">
+          <option value="hitster-de.csv" selected>Hitster Deutschland (Standard - hitster-de.csv)</option>
+          <option value="hitster-de-aaaa0012.csv">Hitster DE – Summer Party</option>
+          <option value="hitster-de-aaaa0015.csv">Hitster DE – Guilty Pleasures</option>
+          <option value="hitster-de-aaaa0007.csv">Hitster DE – Schlager Party</option>
+          <option value="hitster-de-aaaa0039.csv">Hitster DE – Rock</option>
+          <option value="hitster-de-aaaa0026.csv">Hitster DE – Movies & TV Soundtracks</option>
+          <option value="hitster-de-aaaa0025.csv">Hitster DE – Bayern 1</option>
+          <option value="hitster-de-aaaa0054.csv">Hitster DE – Platinum Edition</option>
+          <option value="BUILTIN">⚡ Integriertes Offline-Deck (Sofort spielbar)</option>
+        </select>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-slate-800/80">
+          <span class="text-xs text-slate-400">Lokale CSV-Datei:</span>
+          <input type="file" id="csv-file-input" accept=".csv,.txt" class="text-xs text-slate-300 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-cyan-400 cursor-pointer" />
+        </div>
+
+        <details class="text-xs text-slate-400">
+          <summary class="cursor-pointer hover:text-cyan-400 font-medium">CSV-Text per Copy & Paste einfügen</summary>
+          <div class="mt-1.5 space-y-1.5">
+            <textarea id="csv-paste-area" rows="2" placeholder="CSV hier reinkopieren..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 font-mono"></textarea>
+            <button id="parse-paste-btn" type="button" class="px-3 py-1 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">Einlesen</button>
+          </div>
+        </details>
+
+        <div id="deck-status" class="text-xs font-bold text-emerald-400"></div>
+      </div>
+
+      <!-- 2. Spielmodus & Schwierigkeit -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
+            2. Spielmodus
+          </label>
+          <select id="game-mode-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold">
+            <option value="competitive" selected>🏆 Jeder gegen Jeden (Mit Tokens)</option>
+            <option value="coop">🤝 Zusammenspiel (Koop – 5 Leben)</option>
+            <option value="classic">⚡ Klassisch (Ohne Tokens)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
+            3. Karten zum Sieg
+          </label>
+          <select id="target-score-select" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold">
+            <option value="5">5 Karten (Schnell)</option>
+            <option value="7">7 Karten (Mittel)</option>
+            <option value="10" selected>10 Karten (Original)</option>
+            <option value="15">15 Karten (Lang)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 3. Spieler & individueller Schwierigkeitsgrad -->
+      <div id="players-setup-box" class="space-y-2.5 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="text-xs font-bold uppercase tracking-wider text-pink-400">
+              4. Spieler & Schwierigkeitsgrad
+            </label>
+            <p class="text-[11px] text-slate-400">Normal (2🪙) • Profi: +Titel/Artist (5🪙) • Experte: +Exaktes Jahr (3🪙)</p>
+          </div>
+          <button id="add-player-btn" type="button" class="text-xs bg-pink-500/20 text-pink-300 border border-pink-500/40 px-3 py-1.5 rounded-lg font-semibold active:scale-95 transition shrink-0">
+            + Spieler
+          </button>
+        </div>
+        <div id="player-inputs" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+      </div>
+
+      <button id="start-game-btn" type="button" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 hover:from-pink-500 hover:to-cyan-500 font-black text-lg tracking-wide shadow-lg active:scale-[0.99] transition">
+        SPIEL STARTEN
+      </button>
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 2: GAME SCREEN (KOMPAKT FÜR IPAD FULLSCREEN)         -->
+  <!-- ========================================================= -->
+  <div id="game-screen" class="hidden flex-1 flex flex-col justify-between h-[100dvh] overflow-hidden">
+    
+    <!-- TOP BAR: DASHBOARD & 3-TOKEN-SHOP -->
+    <header class="bg-slate-900/95 border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="font-black text-sm sm:text-base bg-gradient-to-r from-pink-500 to-cyan-400 bg-clip-text text-transparent">HITSTER</span>
+        <span id="round-badge" class="text-[11px] bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full font-semibold">Runde 1</span>
+        <span id="deck-count-badge" class="text-[11px] text-slate-500"></span>
+        <span id="final-round-badge" class="hidden text-[11px] bg-amber-500/20 border border-amber-500 text-amber-300 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
+          ⚡ LETZTE RUNDE!
+        </span>
+      </div>
+
+      <!-- Spieler-Karten & Token-Stand -->
+      <div id="dashboard-players" class="flex items-center gap-1.5 overflow-x-auto py-0.5"></div>
+
+      <div class="flex items-center gap-2">
+        <button id="buy-card-btn" type="button" class="text-[11px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-lg font-bold active:scale-95 transition">
+          🛒 3🪙 ➔ +1 Karte
+        </button>
+        <button id="abort-game-btn" type="button" class="text-[11px] text-slate-400 hover:text-rose-400 border border-slate-800 px-2.5 py-1 rounded-lg">
+          Beenden
+        </button>
+      </div>
+    </header>
+
+    <!-- MITTE: AKTIVER SPIELER, CONTROLS, CHALLENGE-PHASE & AUFLÖSUNG -->
+    <section class="flex-1 flex flex-col items-center justify-center px-4 py-1.5 overflow-hidden">
+      <div class="w-full max-w-2xl text-center space-y-2.5">
+        
+        <!-- Aktiver Spieler Header -->
+        <div class="flex flex-col items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Aktuell am Zug</span>
+            <span id="active-player-diff-badge" class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase"></span>
+          </div>
+          <h2 id="active-player-name" class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            A
+          </h2>
+        </div>
+
+        <!-- PHASE 1 & 2: AUDIO CONTROLS & VORLÄUFIGE EINORDNUNG / HITSTER-EINSPRUCH -->
+        <div id="guessing-panel" class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl space-y-3.5">
+          <div class="flex items-center justify-center gap-4">
+            <div id="vinyl-indicator" class="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-600 via-purple-600 to-cyan-500 flex items-center justify-center shadow-lg shrink-0">
+              <div class="w-5 h-5 rounded-full bg-slate-950 border-2 border-slate-700"></div>
+            </div>
+            <p id="audio-status-text" class="text-xs sm:text-sm font-medium text-slate-300 text-left">
+              Höre dir den Song an und wähle unten auf deiner Zeitleiste die passende Lücke!
+            </p>
+          </div>
+
+          <!-- Audio & Token-Skip Buttons -->
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <button id="play-pause-btn" type="button" class="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition">
+              ▶ Play / Pause
+            </button>
+            <button id="restart-song-btn" type="button" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs active:scale-95 transition">
+              ↺ Von vorne
+            </button>
+            <button id="token-skip-btn" type="button" class="px-3.5 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs active:scale-95 transition">
+              🪙 1 Token: Neuer Song
+            </button>
+            <button id="skip-broken-btn" type="button" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-950 text-slate-400 border border-slate-700 font-semibold text-xs active:scale-95 transition" title="Nur falls YouTube-Video gesperrt/defekt ist">
+              ⏭ Video defekt
+            </button>
+          </div>
+
+          <!-- ZWISCHENPHASE (ERSCHEINT SOBALD EINE LÜCKE GEWÄHLT WURDE) -->
+          <div id="challenge-Lock-box" class="hidden pt-2 border-t border-slate-800 space-y-2.5">
+            <div class="text-xs text-amber-300 font-semibold">
+              📌 Position gewählt! Mitspieler können jetzt <span class="font-black underline">„HITSTER!“</span> rufen und 1 🪙 auf eine andere Lücke unten setzen!
+            </div>
+            <div id="active-challenges-list" class="flex flex-wrap items-center justify-center gap-1.5"></div>
+            <button id="reveal-now-btn" type="button" class="w-full sm:w-auto px-8 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-black text-sm sm:text-base shadow-lg active:scale-95 transition">
+              🔍 Karte jetzt aufdecken!
+            </button>
+          </div>
+        </div>
+
+        <!-- PHASE 3: AUFLÖSUNGS-PANEL (MIT PROFI/EXPERTE-CHECK & +1 TOKEN) -->
+        <div id="reveal-panel" class="hidden bg-slate-900 border-2 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-3">
+          <div id="reveal-verdict" class="text-lg sm:text-xl font-black uppercase tracking-wider"></div>
+          
+          <div class="bg-slate-950/90 rounded-2xl p-3.5 border border-slate-800 max-w-lg mx-auto space-y-1">
+            <div id="reveal-year" class="text-4xl sm:text-5xl font-black text-cyan-400">1985</div>
+            <div id="reveal-title" class="text-xl sm:text-2xl font-black text-white leading-tight pt-0.5">Song Title</div>
+            <div id="reveal-artist" class="text-base sm:text-lg font-bold text-cyan-300/90">Artist Name</div>
+          </div>
+
+          <!-- Zusatz-Aktionen bei Auflösung: +1 Token verdienen (Normal) ODER Profi/Experte-Bestätigung -->
+          <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+            <button id="earn-token-btn" type="button" class="hidden px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-bold text-xs active:scale-95 transition">
+              🪙 +1 Token: Titel & Interpret richtig genannt!
+            </button>
+            <button id="revoke-pro-card-btn" type="button" class="hidden px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/50 text-rose-300 font-bold text-xs active:scale-95 transition">
+              ✕ Pflicht-Angabe (Profi/Experte) nicht gewusst ➔ Karte ablegen
+            </button>
+          </div>
+
+          <div>
+            <button id="next-turn-btn" type="button" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 font-black text-base text-white shadow-xl active:scale-95 transition">
+              Nächster Spieler ➔
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- UNTEN: TIMELINE MIT DYNAMISCHEN SCROLL-INDIKATOREN -->
+    <section class="bg-slate-900/95 border-t border-slate-800 py-2.5 px-4 shrink-0 relative">
+      <div class="flex items-center justify-between mb-1 px-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Timeline von <span id="timeline-owner-name" class="text-cyan-400"></span>
+        </span>
+        <span class="text-[11px] text-slate-500">Wischen oder Pfeile nutzen ↔</span>
+      </div>
+
+      <div class="relative flex items-center">
+        <div id="scroll-left-indicator" class="hidden absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent z-20 flex items-center justify-start pl-1 pointer-events-none">
+          <button id="scroll-left-btn" type="button" class="pointer-events-auto w-9 h-9 rounded-full bg-slate-800/95 border border-cyan-500/50 text-cyan-400 font-black shadow-lg active:scale-90 flex items-center justify-center">
+            ◀
+          </button>
+        </div>
+
+        <div id="timeline-container" class="timeline-scroll flex items-center gap-2 overflow-x-auto py-1.5 px-3 min-h-[136px] w-full"></div>
+
+        <div id="scroll-right-indicator" class="hidden absolute right-0 top-0 bottom-0 w-14 bg-gradient-to-l from-slate-950 via-slate-900/90 to-transparent z-20 flex items-center justify-end pr-1 pointer-events-none">
+          <button id="scroll-right-btn" type="button" class="pointer-events-auto w-9 h-9 rounded-full bg-slate-800/95 border border-cyan-500/50 text-cyan-400 font-black shadow-lg active:scale-90 flex items-center justify-center">
+            ▶
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 3: GAME OVER / SIEGEREHRUNG                          -->
+  <!-- ========================================================= -->
+  <div id="gameover-screen" class="hidden flex-1 flex items-center justify-center p-6">
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-7 text-center shadow-2xl space-y-5">
+      <div id="gameover-icon" class="text-5xl">🏆</div>
+      <h2 id="winner-headline" class="text-3xl font-black text-white">Spiel beendet!</h2>
+      <p id="winner-subline" class="text-slate-400 text-sm"></p>
+
+      <div id="leaderboard-list" class="space-y-2 text-left bg-slate-950 p-4 rounded-2xl border border-slate-800"></div>
+
+      <button id="play-again-btn" type="button" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 to-cyan-600 font-black text-lg text-white shadow-lg active:scale-95 transition">
+        Neues Spiel konfigurieren
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /****************************************************************
+     * 0. SINGLE-FILE PWA MANIFEST
+     ****************************************************************/
+    (function setupPWA() {
+      const iconSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%23ec4899' stroke-width='28'/%3E%3Ccircle cx='256' cy='256' r='120' fill='none' stroke='%2322d3ee' stroke-width='20'/%3E%3Ccircle cx='256' cy='256' r='45' fill='%23ec4899'/%3E%3C/svg%3E";
+      const manifest = {
+        name: "Hitster Digital v5.0",
+        short_name: "Hitster",
+        description: "Multiplayer Musik-Jahreszahlen-Spiel inkl. Tokens",
+        start_url: window.location.href,
+        display: "standalone",
+        orientation: "any",
+        background_color: "#020617",
+        theme_color: "#020617",
+        icons: [{ src: iconSvg, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+    })();
+
+    /****************************************************************
+     * 1. WEB AUDIO API SOUND-SYNTHESIZER
+     ****************************************************************/
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playFeedbackSound(type) {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'success') {
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.075);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.075);
+            gain.gain.exponentialRampToValueAtTime(0.25, now + idx * 0.075 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.075 + 0.26);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.075);
+            osc.stop(now + idx * 0.075 + 0.28);
+          });
+        } else if (type === 'coin') {
+          // Kurzer Münz-Sound für Token-Aktionen
+          [987.77, 1318.51].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.2, now + idx * 0.07 + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.2);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.22);
+          });
+        } else {
+          // Fehler-Buzzer
+          [220, 155.56].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.18);
+            osc.frequency.linearRampToValueAtTime(freq - 20, now + idx * 0.18 + 0.22);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.18);
+            gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.18 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.25);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.18);
+            osc.stop(now + idx * 0.18 + 0.26);
+          });
+        }
+      } catch (e) {}
+    }
+
+    /****************************************************************
+     * 2. INTEGRIERTES OFFLINE-DECK & STATE
+     ****************************************************************/
+    const BUILTIN_CSV = `Card#,Artist,Title,URL,Hashed Info,Youtube-Title,Year
+1,Rudi Carrell,Wann wird's mal wieder richtig Sommer,https://www.youtube.com/watch?v=KzEOvyDcVas,,Rudi Carrell,1975
+2,Paul Simon,You Can Call Me Al,https://www.youtube.com/watch?v=uq-gYOrU8bA,,Paul Simon,1986
+3,The Rolling Stones,Start Me Up,https://www.youtube.com/watch?v=SGyOaCXr8Lw,,Rolling Stones,1981
+4,Chubby Checker,The Twist,https://www.youtube.com/watch?v=-CCgDvUM4TM,,Chubby Checker,1960
+5,"Robin Thicke feat. T.I. & Pharrell Williams",Blurred Lines,https://www.youtube.com/watch?v=yyDUC1LUXSU,,Robin Thicke,2013
+6,"Taio Cruz, Flo Rida",Hangover,https://www.youtube.com/watch?v=dLhFDYQHDQY,,Taio Cruz,2011
+7,Daft Punk,One More Time,https://www.youtube.com/watch?v=FGBhQbmPwH8,,Daft Punk,2000
+8,T'Pau,China In Your Hand,https://www.youtube.com/watch?v=T4sV3lqzKqQ,,T'Pau,1987
+9,Tina Turner,The Best,https://www.youtube.com/watch?v=GC5E8ie2pdM,,Tina Turner,1989
+10,Van McCoy & The Soul City Symphony,The Hustle,https://www.youtube.com/watch?v=SFzMs2SN--s,,Van McCoy,1975
+11,Erma Franklin,Piece of My Heart,https://youtu.be/L0QAxIKf8G4?t=16,,Erma Franklin,1967
+12,Eric Carmen,Hungry Eyes,https://www.youtube.com/watch?v=2ssCL292DQA,,Eric Carmen,1987
+13,Culture Club,Karma Chameleon,https://www.youtube.com/watch?v=JmcA9LIIXWw,,Culture Club,1983
+14,Nena,99 Luftballons,https://www.youtube.com/watch?v=Fpu5a0Bl8eY,,Nena,1983
+15,Torfrock,Beinhart,https://www.youtube.com/watch?v=Pmi0XqTlEY8,,Torfrock,1990
+16,50 Cent,In Da Club,https://www.youtube.com/watch?v=5qm8PH4xAss,,50 Cent,2003
+17,Yazoo,Don't Go,https://www.youtube.com/watch?v=_sQGwDeambg,,Yazoo,1982
+18,Whitney Houston,I Wanna Dance with Somebody,https://www.youtube.com/watch?v=LX366rnYTB4,,Whitney Houston,1987`;
+
+    let setupPlayers = [
+      { name: 'A', difficulty: 'normal' },
+      { name: 'B', difficulty: 'normal' },
+      { name: 'C', difficulty: 'normal' }
+    ];
+
+    const state = {
+      rawSongs: [],
+      deck: [],
+      gameMode: 'competitive', // 'competitive' | 'coop' | 'classic'
+      players: [],             // [{ name, difficulty, tokens, maxTokens, canEarnTokens, cards: [] }]
+      activePlayerIdx: 0,
+      round: 1,
+      targetScore: 10,
+      finalRoundTriggered: false,
+      currentSong: null,
+      phase: 'guessing',       // 'guessing' | 'challenge' | 'revealed'
+      selectedSlot: null,      // Vorläufig gewählte Lücke des aktiven Spielers
+      challenges: [],          // [{ playerIdx, slotIdx }]
+      turnWinnerIdx: null,     // Wer hat in diesem Zug die Karte bekommen?
+      turnWonSlotIdx: null,    //An welcher Position liegt die neue Karte?
+      tokenEarnedThisTurn: false
+    };
+
+    let ytPlayer = null;
+    let ytReady = false;
+
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = function () {
+      ytPlayer = new YT.Player('yt-player', {
+        height: '200',
+        width: '200',
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
+        events: {
+          onReady: () => { ytReady = true; },
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+    };
+
+    function onPlayerStateChange(event) {
+      const vinyl = document.getElementById('vinyl-indicator');
+      const statusText = document.getElementById('audio-status-text');
+      if (event.data === YT.PlayerState.PLAYING) {
+        vinyl.classList.add('playing-vinyl');
+        if (state.phase === 'guessing') {
+          statusText.textContent = '🎵 Song läuft... Tippe unten auf eine Lücke (+ Hier)!';
+        }
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        vinyl.classList.remove('playing-vinyl');
+      }
+    }
+
+    function onPlayerError() {
+      if (document.getElementById('game-screen').classList.contains('hidden')) return;
+      showToast('⚠️ YouTube-Video gesperrt – ziehe kostenlos Ersatzkarte...');
+      setTimeout(() => drawReplacementSong(), 900);
+    }
+
+    /****************************************************************
+     * 3. CSV-QUOTE-PARSER
+     ****************************************************************/
+    function parseCSVLine(line) {
+      const cols = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') inQuotes = !inQuotes;
+        else if (ch === ',' && !inQuotes) { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
+      }
+      cols.push(cur.trim());
+      return cols.map(c => c.replace(/^["']+|["']+$/g, '').trim());
+    }
+
+    function parseCSVContent(csvText, sourceLabel) {
+      const statusEl = document.getElementById('deck-status');
+      if (!csvText || typeof csvText !== 'string') return;
+
+      if (csvText.trim().toLowerCase().startsWith('<!doctype') || csvText.includes('<html')) {
+        parseCSVContent(BUILTIN_CSV, 'Integriertes Notfall-Deck');
+        return;
+      }
+
+      const lines = csvText.replace(/^\uFEFF/, '').split(/\r?\n/);
+      const validSongs = [];
+      let headers = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i].trim();
+        if (!rawLine) continue;
+        const cols = parseCSVLine(rawLine);
+
+        if (i === 0 && cols.some(c => /title|artist|year/i.test(c))) {
+          headers = cols.map(h => h.toLowerCase());
+          continue;
+        }
+
+        let titleIdx = headers.indexOf('title'); if (titleIdx === -1) titleIdx = 2;
+        let artistIdx = headers.indexOf('artist'); if (artistIdx === -1) artistIdx = 1;
+        let yearIdx = headers.indexOf('year'); if (yearIdx === -1) yearIdx = cols.length - 1;
+        let urlIdx = headers.indexOf('url');
+        if (urlIdx === -1) urlIdx = cols.findIndex(c => c.includes('youtube.com') || c.includes('youtu.be'));
+
+        const title = cols[titleIdx] || cols[2] || 'Unbekannter Song';
+        const artist = cols[artistIdx] || cols[1] || '';
+        const yearStr = cols[yearIdx] || cols[cols.length - 1] || '';
+        const urlField = (urlIdx !== -1 ? cols[urlIdx] : cols.find(c => c.includes('youtu'))) || '';
+
+        const year = parseInt(yearStr, 10);
+        const ytMatch = urlField.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+        const videoId = ytMatch ? ytMatch[1] : null;
+
+        if (!isNaN(year) && year > 1850 && year <= 2030 && videoId) {
+          validSongs.push({ title, artist, year, videoId });
+        }
+      }
+
+      state.rawSongs = validSongs;
+      if (validSongs.length > 0) {
+        statusEl.className = 'text-xs font-bold text-emerald-400';
+        statusEl.textContent = `✓ ${validSongs.length} gültige Songs geladen (${sourceLabel})`;
+      } else {
+        statusEl.className = 'text-xs font-bold text-rose-400';
+        statusEl.textContent = `❌ 0 Songs in "${sourceLabel}" erkannt.`;
+      }
+    }
+
+    async function loadSelectedGitHubPlaylist() {
+      const select = document.getElementById('playlist-select');
+      const fileName = select.value;
+      const label = select.options[select.selectedIndex].text.trim();
+      const statusEl = document.getElementById('deck-status');
+
+      if (fileName === 'BUILTIN') {
+        parseCSVContent(BUILTIN_CSV, 'Integriertes Offline-Deck');
+        return;
+      }
+
+      statusEl.className = 'text-xs font-bold text-amber-400';
+      statusEl.textContent = `⏳ Lade "${label}"...`;
+
+      const cacheBuster = `?t=${Date.now()}`;
+      const urlsToTry = [
+        `./${fileName}${cacheBuster}`,
+        `https://raw.githubusercontent.com/andygruber/songseeker-hitster-playlists/main/${fileName}`,
+        `https://cdn.jsdelivr.net/gh/andygruber/songseeker-hitster-playlists@main/${fileName}`
+      ];
+
+      for (const url of urlsToTry) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.includes('youtu') && !text.trim().toLowerCase().startsWith('<!doctype')) {
+              parseCSVContent(text, label);
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+      parseCSVContent(BUILTIN_CSV, 'Integriertes Offline-Deck (Fallback aktiv)');
+    }
+
+    /****************************************************************
+     * 4. SETUP UI & EVENTS
+     ****************************************************************/
+    function renderPlayerInputs() {
+      const container = document.getElementById('player-inputs');
+      container.innerHTML = '';
+      setupPlayers.forEach((p, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800';
+        wrapper.innerHTML = `
+          <input type="text" value="${p.name}" data-idx="${idx}" placeholder="Name ${idx + 1}"
+            class="player-name-input w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-pink-500" />
+          <select data-diff-idx="${idx}" class="player-diff-select bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 font-semibold">
+            <option value="normal" ${p.difficulty === 'normal' ? 'selected' : ''}>Normal (2🪙)</option>
+            <option value="pro" ${p.difficulty === 'pro' ? 'selected' : ''}>Profi (5🪙)</option>
+            <option value="expert" ${p.difficulty === 'expert' ? 'selected' : ''}>Experte (3🪙)</option>
+          </select>
+          ${setupPlayers.length > 1 ? `
+            <button type="button" data-remove="${idx}" class="remove-player-btn px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 text-xs">✕</button>
+          ` : ''}
+        `;
+        container.appendChild(wrapper);
+      });
+
+      container.querySelectorAll('.player-name-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          setupPlayers[parseInt(e.target.dataset.idx, 10)].name = e.target.value;
+        });
+      });
+
+      container.querySelectorAll('.player-diff-select').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          setupPlayers[parseInt(e.target.dataset.diffIdx, 10)].difficulty = e.target.value;
+        });
+      });
+
+      container.querySelectorAll('.remove-player-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          setupPlayers.splice(parseInt(e.currentTarget.dataset.remove, 10), 1);
+          renderPlayerInputs();
+        });
+      });
+    }
+
+    document.getElementById('game-mode-select').addEventListener('change', (e) => {
+      const box = document.getElementById('players-setup-box');
+      if (e.target.value === 'coop') {
+        box.classList.add('opacity-50');
+      } else {
+        box.classList.remove('opacity-50');
+      }
+    });
+
+    document.getElementById('add-player-btn').addEventListener('click', () => {
+      setupPlayers.push({ name: `Spieler ${setupPlayers.length + 1}`, difficulty: 'normal' });
+      renderPlayerInputs();
+    });
+
+    document.getElementById('playlist-select').addEventListener('change', () => {
+      document.getElementById('csv-file-input').value = '';
+      loadSelectedGitHubPlaylist();
+    });
+
+    document.getElementById('csv-file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => parseCSVContent(evt.target.result, file.name);
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    document.getElementById('parse-paste-btn').addEventListener('click', () => {
+      parseCSVContent(document.getElementById('csv-paste-area').value, 'Manuelle Text-Eingabe');
+    });
+
+    /****************************************************************
+     * 5. SPIELSTART (INKL. STARTSPIELER NACH ÄLTESTER KARTE)
+     ****************************************************************/
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    document.getElementById('start-game-btn').addEventListener('click', () => {
+      getAudioContext();
+      state.gameMode = document.getElementById('game-mode-select').value;
+      state.targetScore = parseInt(document.getElementById('target-score-select').value, 10);
+
+      if (state.rawSongs.length < 10) {
+        alert(`Es sind aktuell nur ${state.rawSongs.length} Songs geladen.`);
+        return;
+      }
+
+      state.deck = shuffleArray(state.rawSongs);
+      state.round = 1;
+      state.finalRoundTriggered = false;
+
+      if (state.gameMode === 'coop') {
+        // Offizieller Zusammenspiel-Modus: Team startet mit 5 Token und 1 Startkarte
+        state.players = [{
+          name: 'Team Hitster',
+          difficulty: 'normal',
+          tokens: 5,
+          maxTokens: 5,
+          canEarnTokens: false,
+          cards: [state.deck.pop()]
+        }];
+        state.activePlayerIdx = 0;
+      } else {
+        const useTokens = state.gameMode === 'competitive';
+        state.players = setupPlayers.map((p, i) => {
+          const startTokens = !useTokens ? 0 : (p.difficulty === 'pro' ? 5 : (p.difficulty === 'expert' ? 3 : 2));
+          return {
+            name: p.name.trim() || `Spieler ${i + 1}`,
+            difficulty: useTokens ? p.difficulty : 'normal',
+            tokens: startTokens,
+            maxTokens: 5,
+            canEarnTokens: useTokens && p.difficulty === 'normal',
+            cards: [state.deck.pop()]
+          };
+        });
+
+        // Offizielle Regel: Der Spieler mit der frühesten (ältesten) Karte beginnt!
+        let oldestIdx = 0;
+        let oldestYear = state.players[0].cards[0].year;
+        state.players.forEach((p, idx) => {
+          if (p.cards[0].year < oldestYear) {
+            oldestYear = p.cards[0].year;
+            oldestIdx = idx;
+          }
+        });
+        state.activePlayerIdx = oldestIdx;
+        showToast(`🎲 ${state.players[oldestIdx].name} hat die älteste Startkarte (${oldestYear}) und beginnt!`);
+      }
+
+      document.getElementById('buy-card-btn').classList.toggle('hidden', state.gameMode !== 'competitive');
+      document.getElementById('token-skip-btn').classList.toggle('hidden', state.gameMode === 'classic');
+
+      document.getElementById('setup-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+
+      startPlayerTurn();
+    });
+
+    function startPlayerTurn() {
+      if (state.deck.length === 0) {
+        finishGame();
+        return;
+      }
+
+      state.phase = 'guessing';
+      state.selectedSlot = null;
+      state.challenges = [];
+      state.turnWinnerIdx = null;
+      state.turnWonSlotIdx = null;
+      state.tokenEarnedThisTurn = false;
+      state.currentSong = state.deck.pop();
+
+      document.getElementById('guessing-panel').classList.remove('hidden');
+      document.getElementById('challenge-Lock-box').classList.add('hidden');
+      document.getElementById('reveal-panel').classList.add('hidden');
+      document.getElementById('audio-status-text').textContent = 'Lade Song... Tippe unten auf eine Lücke (+ Hier), um deine Karte abzulegen.';
+
+      renderDashboard();
+      renderTimeline();
+      loadAndPlayCurrentSong();
+    }
+
+    function loadAndPlayCurrentSong() {
+      if (!ytReady || !ytPlayer || !state.currentSong) return;
+      try {
+        ytPlayer.loadVideoById(state.currentSong.videoId);
+        ytPlayer.playVideo();
+      } catch (e) {}
+    }
+
+    function drawReplacementSong() {
+      if (state.deck.length === 0) {
+        alert('Keine Karten mehr im Nachziehstapel!');
+        return;
+      }
+      state.currentSong = state.deck.pop();
+      renderDashboard();
+      loadAndPlayCurrentSong();
+    }
+
+    /****************************************************************
+     * 6. DASHBOARD & TIMELINE RENDERING
+     ****************************************************************/
+    function getDiffLabel(diff) {
+      if (diff === 'pro') return 'Profi (Titel+Artist Pflicht)';
+      if (diff === 'expert') return 'Experte (Titel+Artist+Jahr Pflicht)';
+      return 'Originalmodus';
+    }
+
+    function renderDashboard() {
+      const activePlayer = state.players[state.activePlayerIdx];
+      document.getElementById('active-player-name').textContent = activePlayer.name;
+      document.getElementById('timeline-owner-name').textContent = activePlayer.name;
+      document.getElementById('round-badge').textContent = `Runde ${state.round}`;
+      document.getElementById('deck-count-badge').textContent = `(${state.deck.length} im Deck)`;
+
+      const diffBadge = document.getElementById('active-player-diff-badge');
+      diffBadge.textContent = getDiffLabel(activePlayer.difficulty);
+      diffBadge.className = `text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+        activePlayer.difficulty === 'expert'
+          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+          : activePlayer.difficulty === 'pro'
+          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+          : 'bg-slate-800 text-slate-400'
+      }`;
+
+      // Token-Skip-Button Status aktualisieren
+      const skipBtn = document.getElementById('token-skip-btn');
+      if (state.gameMode !== 'classic') {
+        skipBtn.disabled = activePlayer.tokens < 1;
+        skipBtn.className = `px-3.5 py-2.5 rounded-xl border font-bold text-xs transition ${
+          activePlayer.tokens >= 1
+            ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/40 active:scale-95'
+            : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+        }`;
+      }
+
+      document.getElementById('final-round-badge').classList.toggle('hidden', !state.finalRoundTriggered);
+
+      const container = document.getElementById('dashboard-players');
+      container.innerHTML = '';
+
+      state.players.forEach((p, idx) => {
+        const isCurrent = idx === state.activePlayerIdx;
+        const pill = document.createElement('div');
+        pill.className = `px-3 py-1 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition shrink-0 ${
+          isCurrent
+            ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-md scale-105'
+            : 'bg-slate-800/70 border-slate-700 text-slate-400'
+        }`;
+        const tokenBadge = state.gameMode !== 'classic'
+          ? `<span class="text-amber-400 font-black">🪙${p.tokens}</span>`
+          : '';
+        pill.innerHTML = `
+          <span>${p.name}</span>
+          ${tokenBadge}
+          <span class="px-1.5 py-0.5 rounded-md ${isCurrent ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900 text-slate-300'}">
+            ${p.cards.length}/${state.targetScore}
+          </span>
+        `;
+        container.appendChild(pill);
+      });
+    }
+
+    function updateTimelineScrollIndicators() {
+      const container = document.getElementById('timeline-container');
+      const leftInd = document.getElementById('scroll-left-indicator');
+      const rightInd = document.getElementById('scroll-right-indicator');
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+
+      if (maxScrollLeft <= 4) {
+        leftInd.classList.add('hidden');
+        rightInd.classList.add('hidden');
+        return;
+      }
+      leftInd.classList.toggle('hidden', container.scrollLeft <= 8);
+      rightInd.classList.toggle('hidden', container.scrollLeft >= maxScrollLeft - 8);
+    }
+
+    document.getElementById('timeline-container').addEventListener('scroll', updateTimelineScrollIndicators);
+    window.addEventListener('resize', updateTimelineScrollIndicators);
+    document.getElementById('scroll-left-btn').addEventListener('click', () => {
+      document.getElementById('timeline-container').scrollBy({ left: -280, behavior: 'smooth' });
+    });
+    document.getElementById('scroll-right-btn').addEventListener('click', () => {
+      document.getElementById('timeline-container').scrollBy({ left: 280, behavior: 'smooth' });
+    });
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = '';
+      const player = state.players[state.activePlayerIdx];
+      const cards = player.cards;
+
+      for (let slotIdx = 0; slotIdx <= cards.length; slotIdx++) {
+        // Kein Slot zwischen zwei identischen Jahreszahlen
+        const isBetweenIdenticalYears =
+          slotIdx > 0 &&
+          slotIdx < cards.length &&
+          cards[slotIdx - 1].year === cards[slotIdx].year;
+
+        if ((state.phase === 'guessing' || state.phase === 'challenge') && !isBetweenIdenticalYears) {
+          const isPlayerChoice = state.selectedSlot === slotIdx;
+          const challengeEntry = state.challenges.find(c => c.slotIdx === slotIdx);
+
+          const slotBtn = document.createElement('button');
+          slotBtn.type = 'button';
+
+          if (isPlayerChoice) {
+            slotBtn.className = 'shrink-0 h-32 w-24 rounded-2xl border-2 border-amber-400 bg-amber-500/20 flex flex-col items-center justify-center gap-1 text-amber-300 font-black text-xs shadow-lg scale-105 transition';
+            slotBtn.innerHTML = `<span class="text-lg">📌</span><span>Dein Tipp</span><span class="text-[9px] text-amber-200/80">(Ändern: andere Lücke)</span>`;
+          } else if (challengeEntry) {
+            const challenger = state.players[challengeEntry.playerIdx];
+            slotBtn.className = 'shrink-0 h-32 w-24 rounded-2xl border-2 border-pink-500 bg-pink-500/20 flex flex-col items-center justify-center gap-1 text-pink-300 font-black text-xs shadow-lg';
+            slotBtn.innerHTML = `<span class="text-lg">⚡</span><span>HITSTER!</span><span class="text-[10px] bg-pink-500 text-slate-950 px-1.5 rounded">${challenger.name}</span>`;
+          } else {
+            const isStealSlot = state.phase === 'challenge' && state.gameMode === 'competitive' && state.players.length > 1;
+            slotBtn.className = `shrink-0 h-32 w-16 sm:w-20 rounded-2xl border-2 border-dashed ${
+              isStealSlot
+                ? 'border-pink-500/50 hover:border-pink-400 bg-pink-500/10 text-pink-300'
+                : 'border-cyan-500/50 hover:border-cyan-400 bg-cyan-500/10 text-cyan-300'
+            } active:scale-95 flex flex-col items-center justify-center gap-0.5 font-bold text-xs transition`;
+            slotBtn.innerHTML = isStealSlot
+              ? `<span class="text-base">⚡</span><span class="text-[10px]">Klauen</span>`
+              : `<span class="text-xl">+</span><span>Hier</span>`;
+          }
+
+          slotBtn.addEventListener('click', () => handleSlotClick(slotIdx));
+          container.appendChild(slotBtn);
+        }
+
+        // Ausliegende Karte rendern
+        if (slotIdx < cards.length) {
+          const card = cards[slotIdx];
+          const isNewlyWon = state.phase === 'revealed' && state.turnWinnerIdx === state.activePlayerIdx && state.turnWonSlotIdx === slotIdx;
+
+          const cardEl = document.createElement('div');
+          cardEl.className = `shrink-0 h-32 w-36 sm:w-40 rounded-2xl p-3 flex flex-col justify-between shadow-lg border transition ${
+            isNewlyWon
+              ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-105'
+              : 'bg-slate-800 border-slate-700'
+          }`;
+          cardEl.innerHTML = `
+            <div class="text-2xl sm:text-3xl font-black tracking-tight ${isNewlyWon ? 'text-emerald-400' : 'text-cyan-400'}">
+              ${card.year}
+            </div>
+            <div class="space-y-0.5">
+              <div class="text-xs font-bold text-white line-clamp-2 leading-tight" title="${card.title}">
+                ${card.title}
+              </div>
+              <div class="text-[11px] text-slate-400 truncate" title="${card.artist}">
+                ${card.artist}
+              </div>
+            </div>
+          `;
+          container.appendChild(cardEl);
+        }
+      }
+
+      requestAnimationFrame(updateTimelineScrollIndicators);
+    }
+
+    /****************************************************************
+     * 7. LÜCKEN-AUSWAHL, HITSTER-CHALLENGE & AUFLÖSUNG
+     ****************************************************************/
+    function handleSlotClick(slotIdx) {
+      if (state.phase === 'revealed') return;
+
+      // Im Koop- oder Klassik-Modus (oder bei nur 1 Spieler): Sofort aufdecken ohne Stehlen-Zwischenphase
+      if (state.gameMode !== 'competitive' || state.players.length === 1) {
+        state.selectedSlot = slotIdx;
+        resolveTurn();
+        return;
+      }
+
+      // 1. Aktiver Spieler wählt zum ersten Mal seine Lücke -> Starte Challenge-Zwischenphase
+      if (state.phase === 'guessing') {
+        state.selectedSlot = slotIdx;
+        state.phase = 'challenge';
+        document.getElementById('challenge-Lock-box').classList.remove('hidden');
+        renderChallengeBadges();
+        renderTimeline();
+        return;
+      }
+
+      // 2. In der Challenge-Phase: Klick auf einen anderen Slot öffnet das "HITSTER! Klauen"-Modal
+      if (state.phase === 'challenge') {
+        if (slotIdx === state.selectedSlot) return;
+
+        // Prüfen, ob dort schon ein Token liegt (Regel: Zwei Token dürfen nicht an derselben Position liegen)
+        const existingIdx = state.challenges.findIndex(c => c.slotIdx === slotIdx);
+        if (existingIdx !== -1) {
+          // Token wieder zurücknehmen
+          const removed = state.challenges.splice(existingIdx, 1)[0];
+          state.players[removed.playerIdx].tokens += 1;
+          showToast(`Token von ${state.players[removed.playerIdx].name} zurückgenommen.`);
+          renderDashboard();
+          renderChallengeBadges();
+          renderTimeline();
+          return;
+        }
+
+        openChallengerModal(slotIdx);
+      }
+    }
+
+    function openChallengerModal(slotIdx) {
+      const eligible = state.players
+        .map((p, idx) => ({ p, idx }))
+        .filter(item =>
+          item.idx !== state.activePlayerIdx &&
+          item.p.tokens >= 1 &&
+          !state.challenges.some(c => c.playerIdx === item.idx)
+        );
+
+      const overlay = document.getElementById('modal-overlay');
+      const titleEl = document.getElementById('modal-title');
+      const subEl = document.getElementById('modal-subtitle');
+      const btnContainer = document.getElementById('modal-buttons');
+      btnContainer.innerHTML = '';
+
+      titleEl.textContent = '⚡ HITSTER! Karte stehlen';
+      subEl.textContent = 'Welcher Mitspieler setzt 1 Token auf diese Lücke? (Oder der aktive Spieler ändert seinen Tipp)';
+
+      // Option A: Aktiver Spieler möchte seinen eigenen Tipp auf diese Lücke korrigieren (solange noch keine Challenge liegt)
+      if (state.challenges.length === 0) {
+        const moveBtn = document.createElement('button');
+        moveBtn.type = 'button';
+        moveBtn.className = 'w-full py-2.5 px-4 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold text-xs';
+        moveBtn.textContent = `📌 Eigenen Tipp von ${state.players[state.activePlayerIdx].name} hierhin verschieben`;
+        moveBtn.addEventListener('click', () => {
+          state.selectedSlot = slotIdx;
+          overlay.classList.add('hidden');
+          renderTimeline();
+        });
+        btnContainer.appendChild(moveBtn);
+      }
+
+      // Option B: Herausforderer mit mindestens 1 Token
+      eligible.forEach(({ p, idx }) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full py-3 px-4 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-black text-sm flex items-center justify-between';
+        btn.innerHTML = `<span>⚡ ${p.name} ruft HITSTER!</span><span class="text-xs bg-slate-950/40 px-2 py-0.5 rounded">-1 🪙 (Rest: ${p.tokens - 1})</span>`;
+        btn.addEventListener('click', () => {
+          p.tokens -= 1; // Gespielte Token kommen laut Regel zurück in die Schachtel
+          state.challenges.push({ playerIdx: idx, slotIdx });
+          playFeedbackSound('coin');
+          overlay.classList.add('hidden');
+          renderDashboard();
+          renderChallengeBadges();
+          renderTimeline();
+        });
+        btnContainer.appendChild(btn);
+      });
+
+      if (eligible.length === 0 && state.challenges.length > 0) {
+        const info = document.createElement('div');
+        info.className = 'text-xs text-slate-400 py-2';
+        info.textContent = 'Kein weiterer Mitspieler hat mehr freie Tokens für einen Einspruch.';
+        btnContainer.appendChild(info);
+      }
+
+      overlay.classList.remove('hidden');
+    }
+
+    function renderChallengeBadges() {
+      const list = document.getElementById('active-challenges-list');
+      list.innerHTML = '';
+      state.challenges.forEach(c => {
+        const p = state.players[c.playerIdx];
+        const badge = document.createElement('span');
+        badge.className = 'text-[11px] bg-pink-500/20 border border-pink-500 text-pink-300 px-2.5 py-0.5 rounded-full font-bold';
+        badge.textContent = `⚡ ${p.name} hat 1🪙 gesetzt (Antippen der Lücke zum Stornieren)`;
+        list.appendChild(badge);
+      });
+    }
+
+    document.getElementById('reveal-now-btn').addEventListener('click', resolveTurn);
+
+    function isSlotValidForYear(cards, slotIdx, songYear) {
+      const leftYear = slotIdx === 0 ? -Infinity : cards[slotIdx - 1].year;
+      const rightYear = slotIdx === cards.length ? Infinity : cards[slotIdx].year;
+      return songYear >= leftYear && songYear <= rightYear;
+    }
+
+    function insertCardSorted(player, song) {
+      let insertIdx = player.cards.findIndex(c => c.year > song.year);
+      if (insertIdx === -1) insertIdx = player.cards.length;
+      player.cards.splice(insertIdx, 0, song);
+      return insertIdx;
+    }
+
+    function resolveTurn() {
+      state.phase = 'revealed';
+      const activePlayer = state.players[state.activePlayerIdx];
+      const cards = activePlayer.cards;
+      const songYear = state.currentSong.year;
+
+      const activePlayerCorrect = isSlotValidForYear(cards, state.selectedSlot, songYear);
+
+      let verdictText = '';
+      let verdictColor = '';
+
+      if (activePlayerCorrect) {
+        // Aktiver Spieler hat recht (Herausforderungen verfallen laut Regel automatisch)
+        playFeedbackSound('success');
+        cards.splice(state.selectedSlot, 0, state.currentSong);
+        state.turnWinnerIdx = state.activePlayerIdx;
+        state.turnWonSlotIdx = state.selectedSlot;
+
+        verdictText = `✓ RICHTIG EINGEORDNET VON ${activePlayer.name.toUpperCase()}!`;
+        verdictColor = 'text-emerald-400';
+
+        if (cards.length >= state.targetScore) state.finalRoundTriggered = true;
+      } else {
+        // Aktiver Spieler lag falsch -> Prüfe, ob ein Herausforderer mit seinem Token richtig lag!
+        const winningChallenge = state.challenges.find(c => isSlotValidForYear(cards, c.slotIdx, songYear));
+
+        if (winningChallenge) {
+          playFeedbackSound('success');
+          const stealer = state.players[winningChallenge.playerIdx];
+          const insertedAt = insertCardSorted(stealer, state.currentSong);
+          state.turnWinnerIdx = winningChallenge.playerIdx;
+          state.turnWonSlotIdx = insertedAt;
+
+          verdictText = `⚡ HITSTER! ${stealer.name.toUpperCase()} STIEHLT DIE KARTE!`;
+          verdictColor = 'text-pink-400';
+
+          if (stealer.cards.length >= state.targetScore) state.finalRoundTriggered = true;
+        } else {
+          playFeedbackSound('fail');
+          state.turnWinnerIdx = null;
+
+          // Im Zusammenspiel (Koop) kostet jeder Fehler 1 Token!
+          if (state.gameMode === 'coop') {
+            activePlayer.tokens = Math.max(0, activePlayer.tokens - 1);
+            verdictText = `✕ FALSCH! DAS TEAM VERLIERT 1 TOKEN (${activePlayer.tokens} ÜBRIG)`;
+          } else {
+            verdictText = '✕ LEIDER FALSCH! KARTE GEHT WEG.';
+          }
+          verdictColor = 'text-rose-400';
+        }
+      }
+
+      showRevealPanel(verdictText, verdictColor);
+      renderDashboard();
+      renderTimeline();
+    }
+
+    function showRevealPanel(verdictText, verdictColor) {
+      document.getElementById('guessing-panel').classList.add('hidden');
+      const revealPanel = document.getElementById('reveal-panel');
+      const verdictEl = document.getElementById('reveal-verdict');
+
+      const hasWinner = state.turnWinnerIdx !== null;
+      revealPanel.classList.remove('hidden', 'border-emerald-500', 'border-rose-500', 'border-pink-500');
+      revealPanel.classList.add(hasWinner ? 'border-emerald-500' : 'border-rose-500');
+
+      verdictEl.textContent = verdictText;
+      verdictEl.className = `text-lg sm:text-xl font-black uppercase tracking-wider ${verdictColor}`;
+
+      document.getElementById('reveal-year').textContent = state.currentSong.year;
+      document.getElementById('reveal-title').textContent = state.currentSong.title;
+      document.getElementById('reveal-artist').textContent = state.currentSong.artist;
+
+      // Button 1: +1 Token für Interpret & Titel verdienen (nur für aktiven Spieler im Normal-Modus, max 5 Tokens)
+      const activePlayer = state.players[state.activePlayerIdx];
+      const earnBtn = document.getElementById('earn-token-btn');
+      if (activePlayer.canEarnTokens && activePlayer.tokens < activePlayer.maxTokens && !state.tokenEarnedThisTurn) {
+        earnBtn.classList.remove('hidden');
+        earnBtn.textContent = `🪙 +1 Token für ${activePlayer.name} (Titel & Interpret gewusst)`;
+      } else {
+        earnBtn.classList.add('hidden');
+      }
+
+      // Button 2: Profi / Experte Pflicht-Check (Falls der Kartengewinner im Profi/Experte-Modus spielt)
+      const revokeBtn = document.getElementById('revoke-pro-card-btn');
+      if (state.turnWinnerIdx !== null) {
+        const winner = state.players[state.turnWinnerIdx];
+        if (winner.difficulty === 'pro' || winner.difficulty === 'expert') {
+          revokeBtn.classList.remove('hidden');
+          const reqText = winner.difficulty === 'expert' ? 'Titel, Interpret & exaktes Jahr' : 'Titel & Interpret';
+          revokeBtn.textContent = `✕ ${winner.name} (${winner.difficulty.toUpperCase()}): ${reqText} NICHT gewusst ➔ Karte wieder entfernen`;
+        } else {
+          revokeBtn.classList.add('hidden');
+        }
+      } else {
+        revokeBtn.classList.add('hidden');
+      }
+
+      updateNextTurnButtonLabel();
+    }
+
+    // +1 Token für richtige Nennung von Titel & Interpret
+    document.getElementById('earn-token-btn').addEventListener('click', () => {
+      const activePlayer = state.players[state.activePlayerIdx];
+      if (activePlayer.tokens < activePlayer.maxTokens) {
+        activePlayer.tokens += 1;
+        state.tokenEarnedThisTurn = true;
+        playFeedbackSound('coin');
+        showToast(`🪙 ${activePlayer.name} erhält +1 Hitster-Token!`);
+        document.getElementById('earn-token-btn').classList.add('hidden');
+        renderDashboard();
+      }
+    });
+
+    // Profi / Experte hat Titel/Interpret (bzw. exaktes Jahr) nicht gewusst -> Karte wird wieder abgelegt
+    document.getElementById('revoke-pro-card-btn').addEventListener('click', () => {
+      if (state.turnWinnerIdx === null) return;
+      const winner = state.players[state.turnWinnerIdx];
+      winner.cards.splice(state.turnWonSlotIdx, 1);
+      state.turnWinnerIdx = null;
+      state.finalRoundTriggered = state.players.some(p => p.cards.length >= state.targetScore);
+
+      playFeedbackSound('fail');
+      document.getElementById('revoke-pro-card-btn').classList.add('hidden');
+      document.getElementById('reveal-verdict').textContent = `✕ PFLICHT-ANGABE FEHLT – KEINE KARTE FÜR ${winner.name.toUpperCase()}!`;
+      document.getElementById('reveal-verdict').className = 'text-lg sm:text-xl font-black uppercase tracking-wider text-rose-400';
+
+      renderDashboard();
+      renderTimeline();
+      updateNextTurnButtonLabel();
+    });
+
+    function updateNextTurnButtonLabel() {
+      const nextBtn = document.getElementById('next-turn-btn');
+      const isLastPlayerInRound = state.activePlayerIdx === state.players.length - 1;
+      const coopDead = state.gameMode === 'coop' && state.players[0].tokens <= 0;
+
+      if (coopDead || (state.finalRoundTriggered && isLastPlayerInRound)) {
+        nextBtn.textContent = 'Spielende – Auswertung anzeigen 🏆';
+      } else {
+        const nextPlayer = state.players[(state.activePlayerIdx + 1) % state.players.length];
+        nextBtn.textContent = `Weiter zu ${nextPlayer.name} ➔`;
+      }
+    }
+
+    /****************************************************************
+     * 8. TOKEN-AKTIONEN: 1-TOKEN-SKIP & 3-TOKEN-GRATISKARTE
+     ****************************************************************/
+    document.getElementById('token-skip-btn').addEventListener('click', () => {
+      const activePlayer = state.players[state.activePlayerIdx];
+      if (activePlayer.tokens < 1) return;
+      activePlayer.tokens -= 1;
+      playFeedbackSound('coin');
+      showToast(`🪙 ${activePlayer.name} setzt 1 Token ein – neuer Song wird geladen!`);
+      state.phase = 'guessing';
+      state.selectedSlot = null;
+      document.getElementById('challenge-Lock-box').classList.add('hidden');
+      drawReplacementSong();
+    });
+
+    // Jederzeit: 3 Hitster-Token gegen 1 Karte vom Deck tauschen (ohne Raten)
+    document.getElementById('buy-card-btn').addEventListener('click', () => {
+      const buyers = state.players
+        .map((p, idx) => ({ p, idx }))
+        .filter(item => item.p.tokens >= 3);
+
+      const overlay = document.getElementById('modal-overlay');
+      const titleEl = document.getElementById('modal-title');
+      const subEl = document.getElementById('modal-subtitle');
+      const btnContainer = document.getElementById('modal-buttons');
+      btnContainer.innerHTML = '';
+
+      titleEl.textContent = '🛒 3 Tokens ➔ 1 Gratis-Karte';
+      subEl.textContent = 'Offizielle Regel: Tausche jederzeit 3 HITSTER-Token gegen eine Karte vom Stapel direkt auf deine Zeitleiste!';
+
+      if (buyers.length === 0) {
+        const msg = document.createElement('div');
+        msg.className = 'text-xs text-slate-400 py-3';
+        msg.textContent = 'Aktuell hat noch kein Spieler mindestens 3 Hitster-Tokens.';
+        btnContainer.appendChild(msg);
+      } else {
+        buyers.forEach(({ p }) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-between';
+          btn.innerHTML = `<span>${p.name} kauft 1 Karte</span><span class="text-xs bg-slate-950/20 px-2 py-0.5 rounded">-3 🪙 (Hat: ${p.tokens})</span>`;
+          btn.addEventListener('click', () => {
+            if (state.deck.length === 0) {
+              alert('Keine Karten mehr im Deck!');
+              return;
+            }
+            p.tokens -= 3;
+            const freeCard = state.deck.pop();
+            insertCardSorted(p, freeCard);
+            if (p.cards.length >= state.targetScore) state.finalRoundTriggered = true;
+
+            playFeedbackSound('success');
+            showToast(`🎉 ${p.name} tauscht 3🪙 gegen "${freeCard.title}" (${freeCard.year})!`);
+            overlay.classList.add('hidden');
+            renderDashboard();
+            renderTimeline();
+          });
+          btnContainer.appendChild(btn);
+        });
+      }
+
+      overlay.classList.remove('hidden');
+    });
+
+    document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+      document.getElementById('modal-overlay').classList.add('hidden');
+    });
+
+    /****************************************************************
+     * 9. SPIELERWECHSEL & SPIELENDE
+     ****************************************************************/
+    document.getElementById('next-turn-btn').addEventListener('click', () => {
+      if (ytReady && ytPlayer) ytPlayer.stopVideo();
+
+      const isLastPlayerInRound = state.activePlayerIdx === state.players.length - 1;
+      const coopDead = state.gameMode === 'coop' && state.players[0].tokens <= 0;
+
+      if (coopDead || (state.finalRoundTriggered && isLastPlayerInRound)) {
+        finishGame();
+        return;
+      }
+
+      if (isLastPlayerInRound) {
+        state.activePlayerIdx = 0;
+        state.round += 1;
+      } else {
+        state.activePlayerIdx += 1;
+      }
+
+      startPlayerTurn();
+    });
+
+    function finishGame() {
+      if (ytReady && ytPlayer) ytPlayer.stopVideo();
+
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.remove('hidden');
+
+      const headline = document.getElementById('winner-headline');
+      const subline = document.getElementById('winner-subline');
+      const iconEl = document.getElementById('gameover-icon');
+
+      if (state.gameMode === 'coop') {
+        const team = state.players[0];
+        if (team.cards.length >= state.targetScore) {
+          iconEl.textContent = '🏆';
+          headline.textContent = 'Team-Sieg im Zusammenspiel!';
+          subline.textContent = `Ihr habt ${team.cards.length} Karten geschafft und noch ${team.tokens} Token übrig!`;
+        } else {
+          iconEl.textContent = '💥';
+          headline.textContent = 'Keine Tokens mehr übrig!';
+          subline.textContent = `Das Team hat ${team.cards.length} von ${state.targetScore} Karten erreicht.`;
+        }
+      } else {
+        iconEl.textContent = '🏆';
+        const sorted = [...state.players].sort((a, b) => b.cards.length - a.cards.length || b.tokens - a.tokens);
+        const topScore = sorted[0].cards.length;
+        const winners = sorted.filter(p => p.cards.length === topScore);
+
+        if (winners.length === 1) {
+          headline.textContent = `${winners[0].name} gewinnt!`;
+          subline.textContent = `Mit ${topScore} richtig eingeordneten Karten nach ${state.round} Runden.`;
+        } else {
+          headline.textContent = `Unentschieden: ${winners.map(w => w.name).join(' & ')}!`;
+          subline.textContent = `Beide haben ${topScore} Karten auf ihrer Zeitleiste.`;
+        }
+      }
+
+      const list = document.getElementById('leaderboard-list');
+      list.innerHTML = '';
+      const sortedPlayers = [...state.players].sort((a, b) => b.cards.length - a.cards.length || b.tokens - a.tokens);
+      sortedPlayers.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between px-4 py-3 rounded-xl bg-slate-900 border border-slate-800';
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="font-black text-slate-500 w-6">${idx + 1}.</span>
+            <span class="font-bold text-white">${p.name}</span>
+            <span class="text-xs text-amber-400 font-bold">🪙 ${p.tokens}</span>
+          </div>
+          <span class="font-black text-cyan-400">${p.cards.length} Karten</span>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    /****************************************************************
+     * 10. AUDIO BUTTON CONTROLS & HELPER
+     ****************************************************************/
+    document.getElementById('play-pause-btn').addEventListener('click', () => {
+      if (!ytReady || !ytPlayer) return;
+      const playerState = ytPlayer.getPlayerState();
+      if (playerState === YT.PlayerState.PLAYING) ytPlayer.pauseVideo();
+      else ytPlayer.playVideo();
+    });
+
+    document.getElementById('restart-song-btn').addEventListener('click', () => {
+      if (!ytReady || !ytPlayer) return;
+      ytPlayer.seekTo(0, true);
+      ytPlayer.playVideo();
+    });
+
+    document.getElementById('skip-broken-btn').addEventListener('click', () => {
+      showToast('Ziehe kostenlose Ersatzkarte (defektes Video)...');
+      drawReplacementSong();
+    });
+
+    document.getElementById('abort-game-btn').addEventListener('click', () => {
+      if (confirm('Aktuelles Spiel wirklich abbrechen?')) {
+        if (ytReady && ytPlayer) ytPlayer.stopVideo();
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('play-again-btn').addEventListener('click', () => {
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('setup-screen').classList.remove('hidden');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+
+    renderPlayerInputs();
+    loadSelectedGitHubPlaylist();
+  </script>
+</body>
+</html>
