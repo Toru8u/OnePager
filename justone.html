@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Just One – Digitale Edition</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-card: #243248;
+      --border: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --success-hover: #059669;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-white: #ffffff;
+      --card-border: #cbd5e1;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0 16px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      background: var(--accent);
+      color: #000;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .top-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .stat-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-badge strong {
+      color: var(--accent);
+    }
+
+    main {
+      width: 100%;
+      max-width: 640px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      margin-bottom: 16px;
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    h1 { font-size: 1.6rem; text-align: center; }
+    h2 { font-size: 1.3rem; text-align: center; color: var(--accent); }
+    p {
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    /* Buttons */
+    .btn {
+      appearance: none;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 14px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      min-height: 52px;
+      width: 100%;
+      text-decoration: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: #2d3e58;
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+    .btn-success:hover {
+      background: var(--success-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+    .btn-danger:hover {
+      background: var(--danger-hover);
+    }
+
+    .btn-warning {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-small {
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      width: auto;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    /* Setup Phase */
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .player-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      user-select: text;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-icon {
+      width: 48px;
+      height: 48px;
+      min-height: 48px;
+      border-radius: 10px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    /* Word Number Selection Card (Looks like the physical card) */
+    .game-card-mockup {
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      border: 4px solid #cbd5e1;
+      max-width: 320px;
+      margin: 16px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .game-card-title {
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .word-picker-btn {
+      background: #f1f5f9;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #1e293b;
+      transition: all 0.15s;
+    }
+
+    .word-picker-btn:hover, .word-picker-btn:active {
+      background: #e2e8f0;
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .word-number {
+      background: #0f172a;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+    }
+
+    /* Secret Word Display */
+    .secret-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 2px dashed var(--primary);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .secret-word-large {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #60a5fa;
+      letter-spacing: 0.5px;
+      word-break: break-word;
+    }
+
+    /* Clue Review Screen & Striking */
+    .clue-review-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .clue-chip {
+      background: var(--surface-card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .clue-chip.invalid {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: var(--danger);
+      opacity: 0.65;
+    }
+
+    .clue-chip.invalid .clue-text {
+      text-decoration: line-through;
+      color: #fca5a5;
+    }
+
+    .clue-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .clue-author {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .clue-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .clue-status-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .clue-chip.invalid .clue-status-tag {
+      background: var(--danger);
+      color: white;
+    }
+
+    .clue-chip:not(.invalid) .clue-status-tag {
+      background: var(--success);
+      color: white;
+    }
+
+    /* Guesser Display Board */
+    .board-easel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .easel-tile {
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      padding: 16px 22px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      border-bottom: 6px solid #94a3b8;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .easel-tile.empty-stub {
+      background: rgba(255,255,255,0.06);
+      color: #475569;
+      border: 2px dashed #475569;
+      box-shadow: none;
+    }
+
+    /* Custom Word Accordion */
+    .accordion-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 0.85rem;
+    }
+
+    .score-table th, .score-table td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .score-table tr.current-score-row {
+      background: rgba(245, 158, 11, 0.2);
+      border: 2px solid var(--accent);
+      font-weight: bold;
+    }
+
+    .warning-banner {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: #fcd34d;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      JUST ONE <span class="brand-badge">2019</span>
+    </div>
+    <div class="top-stats" id="topStatsBar" style="display: none;">
+      <div class="stat-badge">Karten: <strong id="statCardsRemain">13</strong>/13</div>
+      <div class="stat-badge">Punkte: <strong id="statCurrentScore">0</strong></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. SETUP SCREEN -->
+    <div id="screenSetup" class="screen active">
+      <div class="card-panel">
+        <h1>Just One</h1>
+        <p style="text-align:center;">Das kooperative Partyspiel für 3 bis 7 Spieler. Erratet gemeinsam so viele der 13 geheimen Wörter wie möglich!</p>
+
+        <h3>Spieler (3 bis 7)</h3>
+        <div id="playerListContainer" class="player-list"></div>
+
+        <button class="btn btn-secondary btn-small" id="btnAddPlayer" type="button" style="margin-bottom: 16px;">
+          + Weiteren Spieler hinzufügen
+        </button>
+
+        <div id="threePlayerNotice" class="warning-banner" style="display:none; margin-bottom: 16px;">
+          ℹ️ <strong>3-Spieler-Sonderregel aktiviert:</strong> Beide Hinweisgeber verfassen in jeder Runde jeweils 2 getrennte Hinweise (insgesamt 4 Hinweise).
+        </div>
+
+        <button class="btn btn-primary" id="btnStartGame" type="button">Partie starten</button>
+
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="accordion-toggle" id="btnToggleCustomWords" type="button">Eigene Wortliste anpassen / importieren</button>
+          <div id="customWordsBox" style="display: none; margin-top: 12px; text-align: left;">
+            <p style="font-size: 0.8rem;">Ein Begriff pro Zeile eingeben (wird für zukünftige Runden verwendet):</p>
+            <textarea id="txtCustomWords" rows="6" placeholder="Pyramide&#10;Komet&#10;Vulkan..."></textarea>
+            <button class="btn btn-secondary btn-small" id="btnSaveCustomWords" type="button" style="margin-top: 6px;">Wortpool speichern</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ROUND START & NUMBER PICKING (ACTIVE GUESSER) -->
+    <div id="screenPickNumber" class="screen">
+      <div class="card-panel">
+        <h2 id="pickNumberGuesserTitle">Spieler X ist am Zug!</h2>
+        <p style="text-align: center;">Du bist der <strong>aktive Rater</strong>. Wähle blind eine Zahl von 1 bis 5. Die Mitspieler müssen diesen Begriff für dich umschreiben.</p>
+
+        <div class="game-card-mockup">
+          <div class="game-card-title">Just One • Karte <span id="lblCurrentRoundCardNum">1</span></div>
+          <button class="word-picker-btn" onclick="selectWordNumber(0)">
+            <span>Wort 1</span> <span class="word-number">1</span>
+          </button>
+          <button class="word-picker-btn" onclick="selectWordNumber(1)">
+            <span>Wort 2</span> <span class="word-number">2</span>
+          </button>
+          <button class="word-picker-btn" onclick="selectWordNumber(2)">
+            <span>Wort 3</span> <span class="word-number">3</span>
+          </button>
+          <button class="word-picker-btn" onclick="selectWordNumber(3)">
+            <span>Wort 4</span> <span class="word-number">4</span>
+          </button>
+          <button class="word-picker-btn" onclick="selectWordNumber(4)">
+            <span>Wort 5</span> <span class="word-number">5</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. INTERSTITIAL SCREEN (PASS DEVICE) -->
+    <div id="screenInterstitial" class="screen">
+      <div class="card-panel" style="text-align: center;">
+        <h2 id="interstitialTitle">Geräteübergabe</h2>
+        <div style="font-size: 3.5rem; margin: 16px 0;">📱 ➡️ 👤</div>
+        <p id="interstitialInstruction" style="font-size: 1.15rem; color: #fff;">
+          Bitte gib das Tablet / Smartphone an <strong>[Spieler]</strong> weiter.
+        </p>
+        <div class="warning-banner" id="interstitialWarning">
+          ⚠️ <strong>Rater Augen zu!</strong> Der aktive Rater darf den Bildschirm jetzt keinesfalls sehen!
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btnInterstitialReady" type="button">Ich bin bereit!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CLUE INPUT SCREEN -->
+    <div id="screenClueInput" class="screen">
+      <div class="card-panel">
+        <h2 id="clueInputTitle">Hinweis für [Spieler]</h2>
+        <p style="text-align: center;">Das gesuchte Geheimwort lautet:</p>
+
+        <div class="secret-box">
+          <span class="secret-word-large" id="lblSecretTargetWord">GEHEIMWORT</span>
+        </div>
+
+        <p style="text-align: center; font-size: 0.85rem;">
+          Schreibe <strong>genau ein Wort</strong> als Hinweis auf. Verboten sind: Übersetzungen, erfundene Wörter oder Worte mit gleichem Wortstamm!
+        </p>
+
+        <div id="clueFieldsContainer" style="display:flex; flex-direction:column; gap:12px; margin: 16px 0;"></div>
+
+        <div id="clueWordCountWarning" class="warning-banner" style="display:none;">
+          ⚠️ Achtung: Bitte nur ein einziges Wort eingeben (keine Leerzeichen oder Bindestriche mit mehreren Begriffen).
+        </div>
+
+        <button class="btn btn-primary" id="btnSubmitClue" type="button">Hinweis(e) absenden</button>
+      </div>
+    </div>
+
+    <!-- 5. CLUE REVIEW & DEDUPLICATION (CLUE GIVERS TOGETHER) -->
+    <div id="screenReview" class="screen">
+      <div class="card-panel">
+        <h2>Hinweise vergleichen</h2>
+        <p style="text-align: center;">
+          <strong>Rater schaut weiterhin weg!</strong> Alle Hinweisgeber prüfen gemeinsam die Begriffe.<br>
+          Identische Hinweise wurden automatisch gestrichen. Tippe auf ein Wort, um es manuell zu streichen oder wiederherzustellen (z.B. bei gleichem Wortstamm wie <em>Prinz / Prinzessin</em>).
+        </p>
+
+        <div class="secret-box" style="padding: 10px; margin-bottom: 12px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Gesuchtes Wort war:</span><br>
+          <strong id="lblReviewTargetWord" style="color: #fff; font-size: 1.3rem;">WORT</strong>
+        </div>
+
+        <div id="clueReviewList" class="clue-review-list"></div>
+
+        <div id="allInvalidWarning" class="warning-banner" style="display: none; margin-bottom: 12px;">
+          ❌ Alle Hinweise sind ungültig oder doppelt! Der Rater hat keine Hinweise erhalten.
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btnProceedToGuesser" type="button">Freigeben & an Rater übergeben</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. GUESSING SCREEN (FOR ACTIVE PLAYER) -->
+    <div id="screenGuessing" class="screen">
+      <div class="card-panel" style="text-align: center;">
+        <h2 id="lblGuesserNameTurn">Spieler X ist dran!</h2>
+        <p>Hier sind deine erlaubten Hinweise. Du hast <strong>genau einen Versuch</strong>, das gesuchte Wort laut auszusprechen.</p>
+
+        <div id="easelContainer" class="board-easel"></div>
+
+        <p style="font-size: 0.85rem; margin-top: 14px;">
+          Tippe auf <strong>„Lösung aufdecken“</strong>, sobald du deinen Tipp genannt hast, oder auf <strong>„Passen“</strong>, wenn du kein Risiko eingehen möchtest.
+        </p>
+
+        <div class="btn-group">
+          <button class="btn btn-success" id="btnRevealGuess" type="button">Lösung aufdecken & Auswerten</button>
+          <button class="btn btn-secondary" id="btnPassRound" type="button">Passen (Keine Strafe)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. RESOLUTION SCREEN -->
+    <div id="screenResolution" class="screen">
+      <div class="card-panel" style="text-align: center;">
+        <h2>Runden-Ergebnis</h2>
+        <p>Das gesuchte Wort war:</p>
+        <div class="secret-box">
+          <span class="secret-word-large" id="lblResolutionTargetWord">WORT</span>
+        </div>
+
+        <p id="lblResolutionCluesGiven" style="font-size: 0.9rem;"></p>
+
+        <h3>War die Antwort richtig?</h3>
+        <div class="btn-group">
+          <button class="btn btn-success" id="btnResultCorrect" type="button">
+            ✅ Richtig geraten (+1 Punkt)
+          </button>
+          <button class="btn btn-danger" id="btnResultWrong" type="button">
+            ❌ Falsch geraten (Strafe: Karte + 1 Extrakarte weg)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. GAME OVER SCREEN -->
+    <div id="screenGameOver" class="screen">
+      <div class="card-panel" style="text-align: center;">
+        <h1>Partie beendet!</h1>
+        <div style="font-size: 3.5rem; margin: 12px 0;">🏆</div>
+        <p>Euer Team-Ergebnis nach 13 Karten:</p>
+        <div style="font-size: 3rem; font-weight: 900; color: var(--accent);" id="lblFinalScore">0 / 13</div>
+        <h2 id="lblScoreVerdict" style="color: #fff; margin-top: 6px;">Ergebnis-Titel</h2>
+        <p id="lblScoreDescription" style="font-size: 0.95rem;"></p>
+
+        <table class="score-table">
+          <thead>
+            <tr>
+              <th>Punkte</th>
+              <th>Wertung (Offizielle Anleitung)</th>
+            </tr>
+          </thead>
+          <tbody id="scoreTableBody">
+            <tr data-score="13"><td>13</td><td>Perfekt! Schafft ihr das noch einmal?</td></tr>
+            <tr data-score="12"><td>12</td><td>Unglaublich! Eure Freunde werden staunen!</td></tr>
+            <tr data-score="11"><td>11</td><td>Genial! Eine meisterhafte Leistung!</td></tr>
+            <tr data-score="9-10"><td>9 – 10</td><td>Stark! Ein echtes Spitzenteam!</td></tr>
+            <tr data-score="7-8"><td>7 – 8</td><td>Durchschnitt. Da geht noch mehr!</td></tr>
+            <tr data-score="4-6"><td>4 – 6</td><td>Guter Anfang. Versucht es gleich noch einmal!</td></tr>
+            <tr data-score="0-3"><td>0 – 3</td><td>Übung macht den Meister. Bleibt dran!</td></tr>
+          </tbody>
+        </table>
+
+        <div class="btn-group" style="margin-top: 20px;">
+          <button class="btn btn-primary" id="btnPlayAgainSamePlayers" type="button">Nochmal spielen (gleiche Spieler)</button>
+          <button class="btn btn-secondary" id="btnPlayAgainNewSetup" type="button">Spieler neu konfigurieren</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* ==========================================================================
+       1. EMBEDDED GERMAN WORD POOL (200+ distinct nouns for Just One)
+       ========================================================================== */
+    const DEFAULT_WORD_POOL = [
+      "Pyramide", "Komet", "Vulkan", "Oper", "Astronaut", "Schokolade", "Detektiv", "Diamant",
+      "Leuchtturm", "Känguru", "Gitarre", "Roboter", "Titanic", "Mikroskop", "Dschungel", "Satellit",
+      "Perle", "Kaviar", "Kompass", "Drache", "Ritter", "Burg", "Zeppelin", "Gladiator", "Sphinx",
+      "Mammut", "Tornado", "Gletscher", "Amazonas", "Symphonie", "Ballett", "Museum", "Bumerang",
+      "Chamäleon", "Pinguin", "Kolibri", "Skorpion", "Flamingo", "Eichhörnchen", "Krokodil", "Delfin",
+      "Krake", "Seepferdchen", "Monolith", "Meteorit", "Fossil", "Vulkanier", "U-Boot", "Hubschrauber",
+      "Teleskop", "Mikrofon", "Saxophon", "Trompete", "Klavier", "Harfe", "Schlagzeug", "Zirkus",
+      "Zauberer", "Akrobat", "Dompteur", "Pantomime", "Marionette", "Karussell", "Achterbahn", "Labyrinth",
+      "Bollwerk", "Katapult", "Armbrust", "Schildkröte", "Iglu", "Eisberg", "Geysir", "Oase", "Wüste",
+      "Savanne", "Steppe", "Korallenriff", "Tiefsee", "Schatzkarte", "Piraten", "Schatztruhe", "Anker",
+      "Steuerrad", "Hängematte", "Kokosnuss", "Ananas", "Banane", "Espresso", "Croissant", "Baguette",
+      "Spaghetti", "Pizza", "Sushi", "Wasabi", "Fondue", "Käse", "Brezel", "Biergarten", "Oktoberfest",
+      "Alpen", "Matterhorn", "Mount Everest", "Niagarafälle", "Grand Canyon", "Eiffelturm", "Kolosseum",
+      "Akropolis", "Big Ben", "Kreml", "Taj Mahal", "Chinesische Mauer", "Statue", "Freiheitsstatue",
+      "Hollywood", "Oscar", "Grammy", "Festival", "Karneval", "Maske", "Konfetti", "Feuerwerk", "Champagner",
+      "Barock", "Renaissance", "Impressionismus", "Mona Lisa", "Fresko", "Mosaik", "Galerie", "Skulptur",
+      "Bibliothek", "Enzyklopädie", "Manuskript", "Hieroglyphe", "Papyrus", "Pergament", "Buchdruck",
+      "Zeitung", "Schallplatte", "Kassette", "Laser", "Hologramm", "Algorithmus", "Matrix", "Krypta",
+      "Mumie", "Sarkophag", "Pharao", "Obelisk", "Tempel", "Kloster", "Kathedrale", "Kapelle", "Altar",
+      "Weihrauch", "Glockenturm", "Mühle", "Windrad", "Wasserrad", "Staudamm", "Aquädukt", "Viadukt",
+      "Hängebrücke", "Tunnel", "Bergwerk", "Lore", "Dynamit", "Tresor", "Bankett", "Festmahl", "Kelch",
+      "Krone", "Zepter", "Thron", "Kaiser", "Königin", "Prinz", "Hofnarr", "Wappen", "Rüstung", "Lanze",
+      "Turnier", "Galahad", "Excalibur", "Merlin", "Atlantis", "El Dorado", "Walhalla", "Olymp", "Pegasus",
+      "Zentaur", "Minotaurus", "Zyklop", "Sirene", "Nymphe", "Phönix", "Basilisk", "Gargoyle", "Vampir",
+      "Werwolf", "Mumie", "Zombie", "Geisterbahn", "Spukhaus", "Friedhof", "Mausoleum", "Nebel"
+    ];
+
+    /* ==========================================================================
+       2. STATE & STORAGE MANAGEMENT
+       ========================================================================== */
+    const STORAGE_KEY = "JUST_ONE_GAME_STATE_V1";
+    const WORD_STORAGE_KEY = "JUST_ONE_CUSTOM_WORDS_V1";
+
+    let state = {
+      players: ["Spieler 1", "Spieler 2", "Spieler 3", "Spieler 4"],
+      deck: [], // 13 cards, each card is 5 strings
+      deckIndex: 0,
+      discardCount: 0,
+      score: 0,
+      activeGuesserIdx: 0,
+      currentCard: null,
+      selectedWordIdx: null,
+      clues: [], // list of { author, slot, rawText, normalized, isInvalid }
+      clueGiverSequence: [], // list of { playerIdx, slot }
+      currentClueGiverTurn: 0,
+      phase: "SETUP"
+    };
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Konnte Spielstand nicht speichern", e);
+      }
+      renderHeaderStats();
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.players && parsed.deck) {
+            state = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn("Fehler beim Laden des Spielstands", e);
+      }
+    }
+
+    function getWordPool() {
+      try {
+        const saved = localStorage.getItem(WORD_STORAGE_KEY);
+        if (saved) {
+          const list = JSON.parse(saved);
+          if (Array.isArray(list) && list.length >= 65) return list;
+        }
+      } catch (e) {}
+      return DEFAULT_WORD_POOL;
+    }
+
+    /* ==========================================================================
+       3. UTILITY FUNCTIONS
+       ========================================================================== */
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function normalizeWord(str) {
+      return (str || "")
+        .trim()
+        .toLowerCase()
+        .replace(/ä/g, "ae")
+        .replace(/ö/g, "oe")
+        .replace(/ü/g, "ue")
+        .replace(/ß/g, "ss")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    function switchScreen(screenId) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add("active");
+      window.scrollTo(0, 0);
+    }
+
+    function renderHeaderStats() {
+      const statsBar = document.getElementById("topStatsBar");
+      if (state.phase === "SETUP" || state.phase === "GAME_OVER") {
+        statsBar.style.display = "none";
+        return;
+      }
+      statsBar.style.display = "flex";
+      const cardsRemaining = Math.max(0, state.deck.length - state.deckIndex);
+      document.getElementById("statCardsRemain").textContent = cardsRemaining;
+      document.getElementById("statCurrentScore").textContent = state.score;
+    }
+
+    /* ==========================================================================
+       4. GAME LOGIC & PHASE TRANSITIONS
+       ========================================================================== */
+
+    // Setup Phase
+    function renderSetupPlayerList() {
+      const container = document.getElementById("playerListContainer");
+      container.innerHTML = "";
+      state.players.forEach((name, idx) => {
+        const row = document.createElement("div");
+        row.className = "player-row";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = name;
+        input.placeholder = `Spieler ${idx + 1}`;
+        input.onchange = (e) => {
+          state.players[idx] = e.target.value.trim() || `Spieler ${idx + 1}`;
+          saveState();
+        };
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "btn btn-danger btn-icon";
+        delBtn.innerHTML = "✕";
+        delBtn.title = "Spieler entfernen";
+        delBtn.onclick = () => {
+          if (state.players.length <= 3) {
+            alert("Mindestens 3 Spieler sind erforderlich!");
+            return;
+          }
+          state.players.splice(idx, 1);
+          renderSetupPlayerList();
+          saveState();
+        };
+
+        row.appendChild(input);
+        row.appendChild(delBtn);
+        container.appendChild(row);
+      });
+
+      const notice = document.getElementById("threePlayerNotice");
+      notice.style.display = state.players.length === 3 ? "block" : "none";
+
+      const addBtn = document.getElementById("btnAddPlayer");
+      addBtn.style.display = state.players.length >= 7 ? "none" : "inline-flex";
+    }
+
+    function startNewGame() {
+      if (state.players.length < 3 || state.players.length > 7) {
+        alert("Bitte 3 bis 7 Spieler festlegen.");
+        return;
+      }
+
+      const pool = shuffleArray(getWordPool());
+      if (pool.length < 65) {
+        alert("Wortpool enthält zu wenige Begriffe (mind. 65 benötigt).");
+        return;
+      }
+
+      // Generate 13 cards of 5 words
+      const deck = [];
+      for (let i = 0; i < 13; i++) {
+        deck.push(pool.slice(i * 5, (i + 1) * 5));
+      }
+
+      state.deck = deck;
+      state.deckIndex = 0;
+      state.discardCount = 0;
+      state.score = 0;
+      state.activeGuesserIdx = 0;
+      state.currentCard = state.deck[0];
+      state.selectedWordIdx = null;
+      state.clues = [];
+
+      startRound();
+    }
+
+    function startRound() {
+      if (state.deckIndex >= state.deck.length) {
+        endGame();
+        return;
+      }
+
+      state.currentCard = state.deck[state.deckIndex];
+      state.selectedWordIdx = null;
+      state.clues = [];
+      state.phase = "PICK_NUMBER";
+      saveState();
+
+      const guesserName = state.players[state.activeGuesserIdx];
+      document.getElementById("pickNumberGuesserTitle").textContent = `${guesserName} ist am Zug!`;
+      document.getElementById("lblCurrentRoundCardNum").textContent = `${state.deckIndex + 1} / 13`;
+
+      switchScreen("screenPickNumber");
+    }
+
+    function selectWordNumber(wordIdx) {
+      state.selectedWordIdx = wordIdx;
+
+      // Prepare Clue Giver Sequence
+      state.clueGiverSequence = [];
+      const isThreePlayers = state.players.length === 3;
+
+      state.players.forEach((player, pIdx) => {
+        if (pIdx !== state.activeGuesserIdx) {
+          if (isThreePlayers) {
+            // In 3-player mode, each hint giver provides 2 clues
+            state.clueGiverSequence.push({ playerIdx: pIdx, playerName: player, isDouble: true });
+          } else {
+            state.clueGiverSequence.push({ playerIdx: pIdx, playerName: player, isDouble: false });
+          }
+        }
+      });
+
+      state.currentClueGiverTurn = 0;
+      promptNextClueGiver();
+    }
+
+    function promptNextClueGiver() {
+      if (state.currentClueGiverTurn >= state.clueGiverSequence.length) {
+        // All clues have been entered, proceed to review
+        beginClueReview();
+        return;
+      }
+
+      const turn = state.clueGiverSequence[state.currentClueGiverTurn];
+      const guesserName = state.players[state.activeGuesserIdx];
+
+      state.phase = "INTERSTITIAL";
+      saveState();
+
+      document.getElementById("interstitialTitle").textContent = "Geräteübergabe";
+      document.getElementById("interstitialInstruction").innerHTML =
+        `Bitte gib das Gerät an <strong>${turn.playerName}</strong> weiter.<br><br><span style="font-size:0.9rem; color:var(--text-muted);">(Rater <strong>${guesserName}</strong> schaut weg!)</span>`;
+
+      document.getElementById("btnInterstitialReady").onclick = () => {
+        showClueInputScreen(turn);
+      };
+
+      switchScreen("screenInterstitial");
+    }
+
+    function showClueInputScreen(turn) {
+      state.phase = "CLUE_INPUT";
+      saveState();
+
+      const secretWord = state.currentCard[state.selectedWordIdx];
+      document.getElementById("clueInputTitle").textContent = `Hinweis von ${turn.playerName}`;
+      document.getElementById("lblSecretTargetWord").textContent = secretWord;
+      document.getElementById("clueWordCountWarning").style.display = "none";
+
+      const container = document.getElementById("clueFieldsContainer");
+      container.innerHTML = "";
+
+      if (turn.isDouble) {
+        container.innerHTML = `
+          <div>
+            <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:4px;">Erster Hinweis:</label>
+            <input type="text" id="txtClueInput1" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="1. Wort hier eingeben">
+          </div>
+          <div>
+            <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:4px;">Zweiter Hinweis:</label>
+            <input type="text" id="txtClueInput2" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="2. Wort hier eingeben">
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div>
+            <input type="text" id="txtClueInput1" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Dein Hinweis-Wort hier eingeben">
+          </div>
+        `;
+      }
+
+      const btnSubmit = document.getElementById("btnSubmitClue");
+      btnSubmit.onclick = () => {
+        const val1 = (document.getElementById("txtClueInput1").value || "").trim();
+        const input2Elem = document.getElementById("txtClueInput2");
+        const val2 = input2Elem ? (input2Elem.value || "").trim() : null;
+
+        if (!val1 || (turn.isDouble && !val2)) {
+          alert("Bitte fülle alle Hinweisfelder aus.");
+          return;
+        }
+
+        // Validate multiple words warning
+        const hasSpace1 = val1.split(/\s+/).length > 1;
+        const hasSpace2 = val2 && val2.split(/\s+/).length > 1;
+        if (hasSpace1 || hasSpace2) {
+          const warningBox = document.getElementById("clueWordCountWarning");
+          warningBox.style.display = "block";
+          if (!confirm("Du hast mehrere Wörter eingegeben. Nach den offiziellen Regeln ist nur EXAKT EIN Wort pro Tafel erlaubt! Möchtest du es trotzdem absenden?")) {
+            return;
+          }
+        }
+
+        state.clues.push({
+          author: turn.playerName,
+          slot: 1,
+          rawText: val1,
+          normalized: normalizeWord(val1),
+          isInvalid: false
+        });
+
+        if (turn.isDouble && val2) {
+          state.clues.push({
+            author: turn.playerName,
+            slot: 2,
+            rawText: val2,
+            normalized: normalizeWord(val2),
+            isInvalid: false
+          });
+        }
+
+        state.currentClueGiverTurn++;
+        promptNextClueGiver();
+      };
+
+      switchScreen("screenClueInput");
+      setTimeout(() => {
+        const firstInput = document.getElementById("txtClueInput1");
+        if (firstInput) firstInput.focus();
+      }, 100);
+    }
+
+    function beginClueReview() {
+      state.phase = "CLUE_REVIEW";
+
+      // 1. Automatic Deduplication
+      const secretNormalized = normalizeWord(state.currentCard[state.selectedWordIdx]);
+      const counts = {};
+
+      state.clues.forEach(clue => {
+        counts[clue.normalized] = (counts[clue.normalized] || 0) + 1;
+      });
+
+      state.clues.forEach(clue => {
+        // Invalidate if identical to another clue OR matches secret word
+        if (counts[clue.normalized] > 1 || clue.normalized === secretNormalized) {
+          clue.isInvalid = true;
+        } else {
+          clue.isInvalid = false;
+        }
+      });
+
+      saveState();
+      renderClueReviewList();
+      switchScreen("screenReview");
+    }
+
+    function renderClueReviewList() {
+      const container = document.getElementById("clueReviewList");
+      container.innerHTML = "";
+      document.getElementById("lblReviewTargetWord").textContent = state.currentCard[state.selectedWordIdx];
+
+      state.clues.forEach((clue, idx) => {
+        const chip = document.createElement("div");
+        chip.className = `clue-chip ${clue.isInvalid ? "invalid" : ""}`;
+        chip.title = "Tippen zum Ein-/Ausschließen (Streichen)";
+
+        chip.innerHTML = `
+          <div class="clue-info">
+            <span class="clue-author">${clue.author} ${clue.slot ? `(#${clue.slot})` : ""}</span>
+            <span class="clue-text">${escapeHtml(clue.rawText)}</span>
+          </div>
+          <span class="clue-status-tag">${clue.isInvalid ? "Ungültig" : "Gültig"}</span>
+        `;
+
+        chip.onclick = () => {
+          clue.isInvalid = !clue.isInvalid;
+          saveState();
+          renderClueReviewList();
+        };
+
+        container.appendChild(chip);
+      });
+
+      const validClues = state.clues.filter(c => !c.isInvalid);
+      const warningBanner = document.getElementById("allInvalidWarning");
+      warningBanner.style.display = validClues.length === 0 ? "block" : "none";
+
+      const proceedBtn = document.getElementById("btnProceedToGuesser");
+      const guesserName = state.players[state.activeGuesserIdx];
+      if (validClues.length === 0) {
+        proceedBtn.textContent = `Keine Hinweise übrig – Runde beenden`;
+      } else {
+        proceedBtn.textContent = `Bereit für Rater ${guesserName}`;
+      }
+
+      proceedBtn.onclick = () => {
+        if (validClues.length === 0) {
+          // If all invalidated, auto-pass according to rules (card lost, no penalty)
+          applyPassResolution();
+        } else {
+          handoffToGuesser();
+        }
+      };
+    }
+
+    function handoffToGuesser() {
+      const guesserName = state.players[state.activeGuesserIdx];
+      state.phase = "INTERSTITIAL_GUESSER";
+      saveState();
+
+      document.getElementById("interstitialTitle").textContent = "Bereit zum Raten!";
+      document.getElementById("interstitialInstruction").innerHTML =
+        `Gib das Gerät jetzt an den Rater <strong>${guesserName}</strong> weiter.<br>Alle anderen müssen absolut still sein!`;
+      document.getElementById("interstitialWarning").style.display = "none";
+
+      document.getElementById("btnInterstitialReady").onclick = () => {
+        document.getElementById("interstitialWarning").style.display = "block";
+        showGuesserScreen();
+      };
+
+      switchScreen("screenInterstitial");
+    }
+
+    function showGuesserScreen() {
+      state.phase = "GUESSING";
+      saveState();
+
+      const guesserName = state.players[state.activeGuesserIdx];
+      document.getElementById("lblGuesserNameTurn").textContent = `${guesserName} rät!`;
+
+      const easel = document.getElementById("easelContainer");
+      easel.innerHTML = "";
+
+      const validClues = state.clues.filter(c => !c.isInvalid);
+      validClues.forEach(clue => {
+        const tile = document.createElement("div");
+        tile.className = "easel-tile";
+        tile.textContent = clue.rawText;
+        easel.appendChild(tile);
+      });
+
+      // Show placeholders for eliminated clues to indicate total count
+      const invalidCount = state.clues.length - validClues.length;
+      for (let i = 0; i < invalidCount; i++) {
+        const emptyTile = document.createElement("div");
+        emptyTile.className = "easel-tile empty-stub";
+        emptyTile.textContent = "✕ Gestrichen";
+        easel.appendChild(emptyTile);
+      }
+
+      document.getElementById("btnRevealGuess").onclick = () => {
+        showResolutionScreen();
+      };
+
+      document.getElementById("btnPassRound").onclick = () => {
+        applyPassResolution();
+      };
+
+      switchScreen("screenGuessing");
+    }
+
+    function showResolutionScreen() {
+      state.phase = "RESOLUTION";
+      saveState();
+
+      const target = state.currentCard[state.selectedWordIdx];
+      document.getElementById("lblResolutionTargetWord").textContent = target;
+
+      const validCount = state.clues.filter(c => !c.isInvalid).length;
+      document.getElementById("lblResolutionCluesGiven").textContent =
+        `Verfügbare Hinweise in dieser Runde: ${validCount} von ${state.clues.length}`;
+
+      document.getElementById("btnResultCorrect").onclick = () => {
+        applyCorrectResolution();
+      };
+
+      document.getElementById("btnResultWrong").onclick = () => {
+        applyWrongResolution();
+      };
+
+      switchScreen("screenResolution");
+    }
+
+    /* Resolution actions according to official rulebook */
+    function applyCorrectResolution() {
+      state.score += 1;
+      state.deckIndex += 1;
+      advanceToNextRound();
+    }
+
+    function applyPassResolution() {
+      // Current card is simply lost, no extra penalty
+      state.deckIndex += 1;
+      advanceToNextRound();
+    }
+
+    function applyWrongResolution() {
+      // Penalty: Current card discarded + 1 extra card removed from remaining draw pile
+      state.deckIndex += 1; // current card
+      if (state.deckIndex < state.deck.length) {
+        state.deckIndex += 1; // extra penalty card removed
+      } else {
+        // Official rule: If deck was already empty, lose 1 previously scored point
+        state.score = Math.max(0, state.score - 1);
+      }
+      advanceToNextRound();
+    }
+
+    function advanceToNextRound() {
+      state.activeGuesserIdx = (state.activeGuesserIdx + 1) % state.players.length;
+
+      if (state.deckIndex >= state.deck.length) {
+        endGame();
+      } else {
+        startRound();
+      }
+    }
+
+    /* Game Over & Scoring evaluation */
+    function endGame() {
+      state.phase = "GAME_OVER";
+      saveState();
+
+      document.getElementById("lblFinalScore").textContent = `${state.score} / 13`;
+
+      let verdict = "";
+      let desc = "";
+
+      if (state.score === 13) {
+        verdict = "Perfekt!";
+        desc = "Unglaubliche Meisterleistung! Schafft ihr das noch einmal?";
+      } else if (state.score === 12) {
+        verdict = "Unglaublich!";
+        desc = "Eure Freunde werden staunen!";
+      } else if (state.score === 11) {
+        verdict = "Genial!";
+        desc = "Eine meisterhafte Leistung!";
+      } else if (state.score >= 9) {
+        verdict = "Stark!";
+        desc = "Ein echtes Spitzenteam!";
+      } else if (state.score >= 7) {
+        verdict = "Durchschnitt.";
+        desc = "Da geht noch mehr! Versucht es gleich noch einmal.";
+      } else if (state.score >= 4) {
+        verdict = "Guter Anfang.";
+        desc = "Bleibt dran, die Kommunikation spielt sich ein!";
+      } else {
+        verdict = "Übung macht den Meister.";
+        desc = "Aller Anfang ist schwer – versucht es gleich noch einmal!";
+      }
+
+      document.getElementById("lblScoreVerdict").textContent = verdict;
+      document.getElementById("lblScoreDescription").textContent = desc;
+
+      // Highlight row in scoring table
+      document.querySelectorAll("#scoreTableBody tr").forEach(tr => {
+        tr.classList.remove("current-score-row");
+        const val = tr.getAttribute("data-score");
+        if (
+          (val === "13" && state.score === 13) ||
+          (val === "12" && state.score === 12) ||
+          (val === "11" && state.score === 11) ||
+          (val === "9-10" && (state.score === 9 || state.score === 10)) ||
+          (val === "7-8" && (state.score === 7 || state.score === 8)) ||
+          (val === "4-6" && state.score >= 4 && state.score <= 6) ||
+          (val === "0-3" && state.score <= 3)
+        ) {
+          tr.classList.add("current-score-row");
+        }
+      });
+
+      switchScreen("screenGameOver");
+    }
+
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    /* ==========================================================================
+       5. INITIALIZATION & EVENT BINDINGS
+       ========================================================================== */
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+
+      // UI Listeners for Setup
+      document.getElementById("btnAddPlayer").onclick = () => {
+        if (state.players.length < 7) {
+          state.players.push(`Spieler ${state.players.length + 1}`);
+          renderSetupPlayerList();
+          saveState();
+        }
+      };
+
+      document.getElementById("btnStartGame").onclick = startNewGame;
+
+      document.getElementById("btnPlayAgainSamePlayers").onclick = () => {
+        startNewGame();
+      };
+
+      document.getElementById("btnPlayAgainNewSetup").onclick = () => {
+        state.phase = "SETUP";
+        saveState();
+        renderSetupPlayerList();
+        switchScreen("screenSetup");
+      };
+
+      // Custom Words Accordion & Saving
+      const customWordsBtn = document.getElementById("btnToggleCustomWords");
+      const customWordsBox = document.getElementById("customWordsBox");
+      customWordsBtn.onclick = () => {
+        const isHidden = customWordsBox.style.display === "none";
+        customWordsBox.style.display = isHidden ? "block" : "none";
+        if (isHidden) {
+          document.getElementById("txtCustomWords").value = getWordPool().join("\n");
+        }
+      };
+
+      document.getElementById("btnSaveCustomWords").onclick = () => {
+        const text = document.getElementById("txtCustomWords").value;
+        const words = text
+          .split("\n")
+          .map(w => w.trim())
+          .filter(w => w.length > 1);
+
+        if (words.length < 65) {
+          alert(`Zu wenige Wörter (${words.length}). Für eine 13-Karten-Partie werden mindestens 65 Begriffe benötigt!`);
+          return;
+        }
+
+        try {
+          localStorage.setItem(WORD_STORAGE_KEY, JSON.stringify(words));
+          alert(`Erfolgreich ${words.length} Wörter gespeichert!`);
+          customWordsBox.style.display = "none";
+        } catch (e) {
+          alert("Fehler beim Speichern der Wörter im Browser-Speicher.");
+        }
+      };
+
+      // Restore screen based on saved state
+      renderHeaderStats();
+      if (state.phase === "PICK_NUMBER") {
+        startRound();
+      } else if (state.phase === "INTERSTITIAL") {
+        promptNextClueGiver();
+      } else if (state.phase === "CLUE_REVIEW") {
+        renderClueReviewList();
+        switchScreen("screenReview");
+      } else if (state.phase === "GUESSING") {
+        showGuesserScreen();
+      } else if (state.phase === "RESOLUTION") {
+        showResolutionScreen();
+      } else if (state.phase === "GAME_OVER") {
+        endGame();
+      } else {
+        renderSetupPlayerList();
+        switchScreen("screenSetup");
+      }
+    });
+  </script>
+</body>
+</html>
