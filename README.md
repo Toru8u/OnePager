@@ -6,13 +6,25 @@ OnePager brings together practical HTML-based utilities in one repository. These
 
 
 # 🚀 Tools
-[KreditKompass](KreditKompass.html)
-
-[Image Strip Cutter](image-strip-cutter.html)
+[DayTracker](DayTracker/index.html)
 
 [Font-Generator](font-generator.html)
 
-[DayTracker](DayTracker/index.html)
+[Hitster Digital v3.1](hitster.html)
+
+[Hitster Digital v4.0](hitster_v4.html)
+
+[Hitster Digital v5.0](hitster_v5.html)
+
+[Image Strip Cutter](image-strip-cutter.html)
+
+[Just One](justone.html)
+
+[KreditKompass](KreditKompass.html)
+
+[Minecraft Server Status](minecraft-info.html)
+
+[YouTube Player](youtube-player.html)
 
 
 # ✨ Features
