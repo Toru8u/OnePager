@@ -15,7 +15,7 @@ OnePager brings together practical HTML-based utilities in one repository. These
 | [Hitster Digital v4.0](hitster_v4.html) | Musik-Quizspiel v4.0 mit PWA-Unterstützung und mobilem Layout |
 | [Hitster Digital v5.0](hitster_v5.html) | Musik-Quizspiel v5.0 mit erweiterten Spielregeln (Token-Tausch, Stehlen) und PWA |
 | [Image Strip Cutter](image-strip-cutter.html) | Schneidet und exportiert Bildstreifen oder Spritesheets in Einzelbilder |
-| [One Word](wortpuls.html) | Digitale Browser-Edition des kooperativen Wort- und Partyspiels |
+| [One Word](oneword.html) | Digitale Browser-Edition des kooperativen Wort- und Partyspiels |
 | [KreditKompass](KreditKompass.html) | Intelligenter Kreditrechner zur Berechnung von Tilgung, Zinsen und Raten |
 | [Minecraft Server Status](minecraft-info.html) | Live-Status-Scanner für Minecraft-Server mit Spieleranzeige, Ping und MOTD |
 | [YouTube Player](youtube-player.html) | Minimalistischer, ablenkungsfreier YouTube-Player mit Dark/Light-Theme |
