@@ -81,7 +81,7 @@
               Laden
             </button>
           </div>
-          <p class="text-[11px] text-slate-400">Erwartet Spalten wie <code>Artist</code>, <code>Title</code>, <code>Year</code> und <code>URL</code> (YouTube).</p>
+          <p class="text-[11px] text-slate-400">Unterstützt Standard-CSVs (Spalten: <code>Artist</code>, <code>Title</code>, <code>Year</code>, <code>URL</code> – Reihenfolge egal).</p>
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
@@ -185,14 +185,14 @@
             </p>
           </div>
 
-          <!-- YouTube Player Container (ToS-konform sichtbar eingebunden mit Sichtschutz während des Ratens) -->
+          <!-- YouTube Player Container (200x200px Mindestgröße für YouTube IFrame API & iOS Autoplay) -->
           <div class="flex justify-center">
-            <div class="relative w-52 h-32 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-inner">
-              <div id="yt-player" class="w-full h-full"></div>
+            <div class="relative w-[200px] h-[200px] rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-inner">
+              <div id="yt-player"></div>
               <!-- Sichtschutz-Overlay verhindert Titel-Spoiler im YouTube-Player vor der Auflösung -->
-              <div id="yt-shield" class="absolute inset-0 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-2 z-10 transition-opacity">
-                <span class="text-xl mb-1">🎧</span>
-                <span class="text-[11px] font-semibold text-slate-400">Audio läuft – Titel verdeckt</span>
+              <div id="yt-shield" class="absolute inset-0 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-3 z-10 transition-opacity">
+                <span class="text-2xl mb-1">🎧</span>
+                <span class="text-xs font-semibold text-slate-400">Audio aktiv – Video verdeckt</span>
               </div>
             </div>
           </div>
@@ -363,7 +363,7 @@
     }
 
     /****************************************************************
-     * 2. NEUTRALES DEMO-DECK & STATE (Freie Musikhistorie)
+     * 2. NEUTRALES DEMO-DECK & STATE
      ****************************************************************/
     const BUILTIN_CSV = `Artist,Title,Year,URL
 Chubby Checker,The Twist,1960,https://www.youtube.com/watch?v=-CCgDvUM4TM
@@ -416,8 +416,8 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
 
     window.onYouTubeIframeAPIReady = function () {
       ytPlayer = new YT.Player('yt-player', {
-        height: '100%',
-        width: '100%',
+        height: '200',
+        width: '200',
         playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
         events: {
           onReady: () => { ytReady = true; },
@@ -446,7 +446,7 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
     }
 
     /****************************************************************
-     * 3. CSV-PARSER
+     * 3. CSV-PARSER (Unterstützt 4-Spalten & 7-Spalten CSVs)
      ****************************************************************/
     function parseCSVLine(line) {
       const cols = [];
@@ -485,8 +485,7 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
         return;
       }
 
-      const lines = csvText.replace(/^﻿/, '').split(/?
-/);
+      const lines = csvText.replace(/^\uFEFF/, '').split(/\r?\n/);
       const validSongs = [];
       let headers = [];
 
@@ -506,13 +505,21 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
         let yearIdx = headers.indexOf('year');
         let urlIdx = headers.indexOf('url');
 
+        // Automatische Spalten-Erkennung für CSVs ohne Header (4-Spalten vs. 7-Spalten Format)
+        const hasCardNumFirst = /^\d+$/.test(cols[0]) && cols.length >= 6;
+        if (artistIdx === -1) artistIdx = hasCardNumFirst ? 1 : 0;
+        if (titleIdx === -1) titleIdx = hasCardNumFirst ? 2 : 1;
+        if (yearIdx === -1) {
+          yearIdx = cols.findIndex((c, idx) => idx >= 2 && /^(19\d\d|20\d\d)$/.test(c));
+          if (yearIdx === -1) yearIdx = cols.length - 1;
+        }
         if (urlIdx === -1) {
           urlIdx = cols.findIndex(c => c.includes('youtube.com') || c.includes('youtu.be'));
         }
 
-        const title = (titleIdx !== -1 ? cols[titleIdx] : cols[1]) || 'Unbekannter Titel';
-        const artist = (artistIdx !== -1 ? cols[artistIdx] : cols[0]) || 'Unbekannter Interpret';
-        const yearStr = (yearIdx !== -1 ? cols[yearIdx] : cols[2]) || '';
+        const title = cols[titleIdx] || 'Unbekannter Titel';
+        const artist = cols[artistIdx] || 'Unbekannter Interpret';
+        const yearStr = cols[yearIdx] || '';
         const urlField = (urlIdx !== -1 ? cols[urlIdx] : cols.find(c => c.includes('youtube'))) || '';
 
         const year = parseInt(yearStr, 10);
@@ -533,8 +540,7 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
         statusEl.className = 'text-xs font-bold text-rose-400 pt-1';
         statusEl.textContent = `❌ Keine gueltigen Tracks in "${sourceLabel}" erkannt.`;
         debugEl.classList.remove('hidden');
-        debugEl.textContent = lines.slice(0, 3).join('
-');
+        debugEl.textContent = lines.slice(0, 3).join('\n');
       }
     }
 
@@ -676,7 +682,7 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
       document.getElementById('yt-shield').classList.remove('opacity-0', 'pointer-events-none');
       document.getElementById('guessing-panel').classList.remove('hidden');
       document.getElementById('reveal-panel').classList.add('hidden');
-      document.getElementById('audio-status-text').textContent = 'Lade Track...';
+      document.getElementById('audio-status-text').textContent = 'Lade Track... (Falls kein Ton kommt, auf Play tippen)';
 
       renderDashboard();
       renderTimeline();
@@ -873,7 +879,6 @@ The Weeknd,Blinding Lights,2020,https://www.youtube.com/watch?v=4NRXx6U8ABQ`;
     }
 
     function showRevealPanel(isCorrect) {
-      // YouTube Shield aufheben, sodass Titel/Thumbnail nun sichtbar sind
       document.getElementById('yt-shield').classList.add('opacity-0', 'pointer-events-none');
       document.getElementById('guessing-panel').classList.add('hidden');
       const revealPanel = document.getElementById('reveal-panel');
