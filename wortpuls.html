@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -116,8 +117,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .card-panel {
@@ -129,13 +137,24 @@
       margin-bottom: 16px;
     }
 
-    h1, h2, h3 {
+    h1,
+    h2,
+    h3 {
       font-weight: 700;
       margin-bottom: 12px;
     }
 
-    h1 { font-size: 1.6rem; text-align: center; }
-    h2 { font-size: 1.3rem; text-align: center; color: var(--accent); }
+    h1 {
+      font-size: 1.6rem;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      text-align: center;
+      color: var(--accent);
+    }
+
     p {
       color: var(--text-muted);
       line-height: 1.5;
@@ -177,6 +196,7 @@
       border: 1px solid var(--border);
       color: var(--text);
     }
+
     .btn-secondary:hover {
       background: #2d3e58;
     }
@@ -184,6 +204,7 @@
     .btn-success {
       background: var(--success);
     }
+
     .btn-success:hover {
       background: var(--success-hover);
     }
@@ -191,6 +212,7 @@
     .btn-danger {
       background: var(--danger);
     }
+
     .btn-danger:hover {
       background: var(--danger-hover);
     }
@@ -228,7 +250,8 @@
       align-items: center;
     }
 
-    input[type="text"], textarea {
+    input[type="text"],
+    textarea {
       width: 100%;
       padding: 12px 14px;
       border-radius: 10px;
@@ -240,7 +263,8 @@
       user-select: text;
     }
 
-    input[type="text"]:focus, textarea:focus {
+    input[type="text"]:focus,
+    textarea:focus {
       border-color: var(--primary);
     }
 
@@ -259,7 +283,7 @@
       color: #0f172a;
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
       border: 4px solid #cbd5e1;
       max-width: 320px;
       margin: 16px auto;
@@ -293,7 +317,8 @@
       transition: all 0.15s;
     }
 
-    .word-picker-btn:hover, .word-picker-btn:active {
+    .word-picker-btn:hover,
+    .word-picker-btn:active {
       background: #e2e8f0;
       border-color: var(--primary);
       transform: translateX(4px);
@@ -412,14 +437,14 @@
       padding: 16px 22px;
       font-size: 1.4rem;
       font-weight: 800;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
       border-bottom: 6px solid #94a3b8;
       min-width: 140px;
       text-align: center;
     }
 
     .easel-tile.empty-stub {
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.06);
       color: #475569;
       border: 2px dashed #475569;
       box-shadow: none;
@@ -444,7 +469,8 @@
       font-size: 0.85rem;
     }
 
-    .score-table th, .score-table td {
+    .score-table th,
+    .score-table td {
       border: 1px solid var(--border);
       padding: 8px 10px;
       text-align: left;
@@ -467,11 +493,12 @@
     }
   </style>
 </head>
+
 <body>
 
   <header>
     <div class="brand-title">
-      JUST ONE <span class="brand-badge">2019</span>
+      ONE WORD <span class="brand-badge">GAME</span>
     </div>
     <div class="top-stats" id="topStatsBar" style="display: none;">
       <div class="stat-badge">Karten: <strong id="statCardsRemain">13</strong>/13</div>
@@ -484,7 +511,8 @@
     <div id="screenSetup" class="screen active">
       <div class="card-panel">
         <h1>Wortpuls</h1>
-        <p style="text-align:center;">Das kooperative Partyspiel für 3 bis 7 Spieler. Erratet gemeinsam so viele der 13 geheimen Wörter wie möglich!</p>
+        <p style="text-align:center;">Das kooperative Partyspiel für 3 bis 7 Spieler. Erratet gemeinsam so viele der 13
+          geheimen Wörter wie möglich!</p>
 
         <h3>Spieler (3 bis 7)</h3>
         <div id="playerListContainer" class="player-list"></div>
@@ -494,17 +522,20 @@
         </button>
 
         <div id="threePlayerNotice" class="warning-banner" style="display:none; margin-bottom: 16px;">
-          ℹ️ <strong>3-Spieler-Sonderregel aktiviert:</strong> Beide Hinweisgeber verfassen in jeder Runde jeweils 2 getrennte Hinweise (insgesamt 4 Hinweise).
+          ℹ️ <strong>3-Spieler-Sonderregel aktiviert:</strong> Beide Hinweisgeber verfassen in jeder Runde jeweils 2
+          getrennte Hinweise (insgesamt 4 Hinweise).
         </div>
 
         <button class="btn btn-primary" id="btnStartGame" type="button">Partie starten</button>
 
         <div style="margin-top: 20px; text-align: center;">
-          <button class="accordion-toggle" id="btnToggleCustomWords" type="button">Eigene Wortliste anpassen / importieren</button>
+          <button class="accordion-toggle" id="btnToggleCustomWords" type="button">Eigene Wortliste anpassen /
+            importieren</button>
           <div id="customWordsBox" style="display: none; margin-top: 12px; text-align: left;">
             <p style="font-size: 0.8rem;">Ein Begriff pro Zeile eingeben (wird für zukünftige Runden verwendet):</p>
             <textarea id="txtCustomWords" rows="6" placeholder="Pyramide&#10;Komet&#10;Vulkan..."></textarea>
-            <button class="btn btn-secondary btn-small" id="btnSaveCustomWords" type="button" style="margin-top: 6px;">Wortpool speichern</button>
+            <button class="btn btn-secondary btn-small" id="btnSaveCustomWords" type="button"
+              style="margin-top: 6px;">Wortpool speichern</button>
           </div>
         </div>
       </div>
@@ -514,7 +545,8 @@
     <div id="screenPickNumber" class="screen">
       <div class="card-panel">
         <h2 id="pickNumberGuesserTitle">Spieler X ist am Zug!</h2>
-        <p style="text-align: center;">Du bist der <strong>aktive Rater</strong>. Wähle blind eine Zahl von 1 bis 5. Die Mitspieler müssen diesen Begriff für dich umschreiben.</p>
+        <p style="text-align: center;">Du bist der <strong>aktive Rater</strong>. Wähle blind eine Zahl von 1 bis 5. Die
+          Mitspieler müssen diesen Begriff für dich umschreiben.</p>
 
         <div class="game-card-mockup">
           <div class="game-card-title">Wortpuls • Runde <span id="lblCurrentRoundCardNum">1</span></div>
@@ -565,7 +597,8 @@
         </div>
 
         <p style="text-align: center; font-size: 0.85rem;">
-          Schreibe <strong>genau ein Wort</strong> als Hinweis auf. Verboten sind: Übersetzungen, erfundene Wörter oder Worte mit gleichem Wortstamm!
+          Schreibe <strong>genau ein Wort</strong> als Hinweis auf. Verboten sind: Übersetzungen, erfundene Wörter oder
+          Worte mit gleichem Wortstamm!
         </p>
 
         <div id="clueFieldsContainer" style="display:flex; flex-direction:column; gap:12px; margin: 16px 0;"></div>
@@ -584,7 +617,8 @@
         <h2>Hinweise vergleichen</h2>
         <p style="text-align: center;">
           <strong>Rater schaut weiterhin weg!</strong> Alle Hinweisgeber prüfen gemeinsam die Begriffe.<br>
-          Identische Hinweise wurden automatisch gestrichen. Tippe auf ein Wort, um es manuell zu streichen oder wiederherzustellen (z.B. bei gleichem Wortstamm wie <em>Prinz / Prinzessin</em>).
+          Identische Hinweise wurden automatisch gestrichen. Tippe auf ein Wort, um es manuell zu streichen oder
+          wiederherzustellen (z.B. bei gleichem Wortstamm wie <em>Prinz / Prinzessin</em>).
         </p>
 
         <div class="secret-box" style="padding: 10px; margin-bottom: 12px;">
@@ -608,12 +642,14 @@
     <div id="screenGuessing" class="screen">
       <div class="card-panel" style="text-align: center;">
         <h2 id="lblGuesserNameTurn">Spieler X ist dran!</h2>
-        <p>Hier sind deine erlaubten Hinweise. Du hast <strong>genau einen Versuch</strong>, das gesuchte Wort laut auszusprechen.</p>
+        <p>Hier sind deine erlaubten Hinweise. Du hast <strong>genau einen Versuch</strong>, das gesuchte Wort laut
+          auszusprechen.</p>
 
         <div id="easelContainer" class="board-easel"></div>
 
         <p style="font-size: 0.85rem; margin-top: 14px;">
-          Tippe auf <strong>„Lösung aufdecken“</strong>, sobald du deinen Tipp genannt hast, oder auf <strong>„Passen“</strong>, wenn du kein Risiko eingehen möchtest.
+          Tippe auf <strong>„Lösung aufdecken“</strong>, sobald du deinen Tipp genannt hast, oder auf
+          <strong>„Passen“</strong>, wenn du kein Risiko eingehen möchtest.
         </p>
 
         <div class="btn-group">
@@ -664,18 +700,40 @@
             </tr>
           </thead>
           <tbody id="scoreTableBody">
-            <tr data-score="13"><td>13</td><td>Perfekt! Schafft ihr das noch einmal?</td></tr>
-            <tr data-score="12"><td>12</td><td>Unglaublich! Eure Freunde werden staunen!</td></tr>
-            <tr data-score="11"><td>11</td><td>Genial! Eine meisterhafte Leistung!</td></tr>
-            <tr data-score="9-10"><td>9 – 10</td><td>Stark! Ein echtes Spitzenteam!</td></tr>
-            <tr data-score="7-8"><td>7 – 8</td><td>Durchschnitt. Da geht noch mehr!</td></tr>
-            <tr data-score="4-6"><td>4 – 6</td><td>Guter Anfang. Versucht es gleich noch einmal!</td></tr>
-            <tr data-score="0-3"><td>0 – 3</td><td>Übung macht den Meister. Bleibt dran!</td></tr>
+            <tr data-score="13">
+              <td>13</td>
+              <td>Perfekt! Schafft ihr das noch einmal?</td>
+            </tr>
+            <tr data-score="12">
+              <td>12</td>
+              <td>Unglaublich! Eure Freunde werden staunen!</td>
+            </tr>
+            <tr data-score="11">
+              <td>11</td>
+              <td>Genial! Eine meisterhafte Leistung!</td>
+            </tr>
+            <tr data-score="9-10">
+              <td>9 – 10</td>
+              <td>Stark! Ein echtes Spitzenteam!</td>
+            </tr>
+            <tr data-score="7-8">
+              <td>7 – 8</td>
+              <td>Durchschnitt. Da geht noch mehr!</td>
+            </tr>
+            <tr data-score="4-6">
+              <td>4 – 6</td>
+              <td>Guter Anfang. Versucht es gleich noch einmal!</td>
+            </tr>
+            <tr data-score="0-3">
+              <td>0 – 3</td>
+              <td>Übung macht den Meister. Bleibt dran!</td>
+            </tr>
           </tbody>
         </table>
 
         <div class="btn-group" style="margin-top: 20px;">
-          <button class="btn btn-primary" id="btnPlayAgainSamePlayers" type="button">Nochmal spielen (gleiche Spieler)</button>
+          <button class="btn btn-primary" id="btnPlayAgainSamePlayers" type="button">Nochmal spielen (gleiche
+            Spieler)</button>
           <button class="btn btn-secondary" id="btnPlayAgainNewSetup" type="button">Spieler neu konfigurieren</button>
         </div>
       </div>
@@ -765,7 +823,7 @@
           const list = JSON.parse(saved);
           if (Array.isArray(list) && list.length >= 65) return list;
         }
-      } catch (e) {}
+      } catch (e) { }
       return DEFAULT_WORD_POOL;
     }
 
@@ -1366,4 +1424,5 @@
     });
   </script>
 </body>
+
 </html>
